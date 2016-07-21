@@ -1,0 +1,10 @@
+*.pyc
+*.log
+*.log.*
+*.sqlite*
+twistd.*
+*#*
+*.save
+pysrc
+.create.sh
+credentials/*

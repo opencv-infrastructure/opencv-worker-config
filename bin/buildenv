@@ -1,0 +1,48 @@
+#!/bin/bash -e
+if [[ -n "${BUILD_INIT_CI}" || "$1 $2" == "ci init" ]]; then
+  [ -z "${BUILD_CI_URL}" ] && BUILD_CI_URL=$(cd src; git ls-remote --get-url origin | sed -r 's/(.git)?$/-ci\1/g')
+  (
+    mkdir -p ci; cd ci;
+    [ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1 || git clone --depth=10 ${BUILD_CI_URL} . 1>&2
+    git fetch ${BUILD_CI_URL} ${BUILD_CI_BRANCH:-HEAD} 1>&2 && git reset --hard 1>&2 && git clean -f -d -x 1>&2 && git checkout -q --detach FETCH_HEAD 1>&2
+  ) || exit 1
+  if [[ "$1 $2" != "ci init" ]]; then
+    exit 0
+  fi
+fi
+
+# limit resources for spawned processes
+echo $$ > /sys/fs/cgroup/memory/build_buildenv/tasks
+
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  set +e
+  rm opencv/.git/index.lock 2>/dev/null
+  rm opencv_extra/.git/index.lock 2>/dev/null
+  rm opencv_contrib/.git/index.lock 2>/dev/null
+  rm opencv_extra/.git/refs/heads/master.lock 2>/dev/null
+  exit 0
+fi
+export ANDROID_NDK="/opt/android/android-ndk-r9/"
+export ANDROID_SDK="/opt/android/android-sdk-linux/"
+export NDKROOT=${ANDROID_NDK}
+
+if [ -n "${BUILD_PRECOMMIT}" ]; then
+  export PATH="/usr/lib/ccache:$PATH"
+  export CCACHE_DIR=/build/.ccache
+  export CCACHE_SLOPPINESS=pch_defines,time_macros,file_macro
+  # Doesn't work in docker: export CCACHE_HARDLINK=1
+  # export CCACHE_LOGFILE=/build/.ccache/ccache.log
+fi
+#export CXXFLAGS="-Wno-array-bounds"
+
+if [[ "$1" == "ci" ]]; then
+  shift
+  if [[ "${BUILD_CI_TARGET_OS}" == "linux" ]]; then
+    SCRIPT=./ci/linux/$1
+  else
+    SCRIPT=./ci/linux-${BUILD_CI_TARGET_OS}/$1
+  fi
+  shift
+  exec $SCRIPT $@
+fi
+exec $@
