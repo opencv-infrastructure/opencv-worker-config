@@ -1,0 +1,4 @@
+[submodule "buildbot"]
+	path = buildbot
+	url = ../common-buildbot.git
+	branch = ocv_master
