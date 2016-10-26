@@ -8,3 +8,5 @@ twistd.*
 pysrc
 .create.sh
 credentials/*
+downloads/*
+logs/*

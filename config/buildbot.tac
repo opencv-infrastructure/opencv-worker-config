@@ -66,33 +66,3 @@ s = BuildSlave(buildmaster_host, port, slavename, passwd, '/build/',
                keepalive, usepty, umask=umask, maxdelay=maxdelay,
                allow_shutdown=allow_shutdown)
 s.setServiceParent(application)
-
-buildmaster_host = MASTER_HOST
-port = int(MASTER_PORT)
-slavename = SLAVE_NAME+'-2'
-passwd = SLAVE_PASS
-keepalive = 300
-usepty = 0
-umask = None
-maxdelay = 60
-allow_shutdown = True
-
-s = BuildSlave(buildmaster_host, port, slavename, passwd, '/build-2/',
-               keepalive, usepty, umask=umask, maxdelay=maxdelay,
-               allow_shutdown=allow_shutdown)
-s.setServiceParent(application)
-
-buildmaster_host = MASTER_HOST
-port = int(MASTER_PORT)
-slavename = SLAVE_NAME+'-3'
-passwd = SLAVE_PASS
-keepalive = 300
-usepty = 0
-umask = None
-maxdelay = 60
-allow_shutdown = True
-
-s = BuildSlave(buildmaster_host, port, slavename, passwd, '/build-3/',
-               keepalive, usepty, umask=umask, maxdelay=maxdelay,
-               allow_shutdown=allow_shutdown)
-s.setServiceParent(application)

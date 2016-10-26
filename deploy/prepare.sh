@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 if [ -f /app/deploy/env.sh ]; then
   . /app/deploy/env.sh
@@ -9,14 +9,12 @@ virtualenv --system-site-packages /env
 
 set -x
 
-pip install pyOpenSSL
-
 (
 cd /app/buildbot/slave
 python setup.py develop
 )
 
-mkdir /build/logs
+mkdir -p /build/logs
 cp -rf /app/config/info /build/
 [[ -d /build-2 ]] && cp -rf /app/config/info /build-2/
 [[ -d /build-3 ]] && cp -rf /app/config/info /build-3/

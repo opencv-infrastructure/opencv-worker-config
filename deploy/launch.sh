@@ -11,6 +11,8 @@ cd /build/_repos
 [ -d /build-2 ] && /app/scripts/build_clone_repositories.sh /build-2
 [ -d /build-3 ] && /app/scripts/build_clone_repositories.sh /build-3
 
+echo "Starting build worker..."
+
 cd /app/config
 if [ -z "$DEBUG" ]; then
   buildslave start --nodaemon

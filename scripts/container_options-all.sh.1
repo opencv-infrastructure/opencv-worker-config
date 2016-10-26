@@ -1,0 +1,8 @@
+host_mountpoint()
+{
+  echo "$*"
+}
+
+# attach Intel iGPU
+# DOCKER_OPTS="--device=/dev/dri:/dev/dri"
+DOCKER_OPTS="$DOCKER_OPTS -v /opt:/opt:ro"

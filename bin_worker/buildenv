@@ -1,0 +1,44 @@
+#!/bin/bash -e
+
+CCACHE_VERSION=$(ccache --version | head -n 1 | tr ' ' '\n' | tail -n1)
+if [ -n "${CCACHE_VERSION}" ]; then
+  # Don't mix ccache storages with different versions
+  export CCACHE_DIR=/build/.ccache/ver_${CCACHE_VERSION}
+  export CCACHE_SLOPPINESS=pch_defines,time_macros,file_macro
+  export CCACHE_CPP2=true
+  # Doesn't work in docker:
+  #export CCACHE_HARDLINK=1
+  # ccache log size is not limited, so don't put it into permanent directory like CCACHE_DIR
+  export CCACHE_LOGFILE=$BASE_DIR/.container/ccache.log
+  if [ ! -d "${CCACHE_DIR}" ]; then
+    mkdir -p "${CCACHE_DIR}"
+    ccache -M 16G
+  fi
+fi
+
+get_image_script()
+{
+  local docker_image=$1
+  local image=$(echo $docker_image | sed 's/^opencv-//g' | sed 's/:/--/g')
+  if [[ -n "$image" ]]; then
+    local script_name="/app/bin/buildenv-$image"
+    if [ -f "${script_name}" ]; then
+      echo "${script_name}"
+    fi
+  else
+    return 0
+  fi
+}
+
+script_name=$(get_image_script all)
+if [ -n "${script_name}" ]; then
+  . "${script_name}" "$@"
+fi
+
+script_name=$(get_image_script $BUILD_IMAGE)
+if [ -n "${script_name}" ]; then
+  . "${script_name}" "$@"
+  exit $?
+else
+  exec "$@"
+fi

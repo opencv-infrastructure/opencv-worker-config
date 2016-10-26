@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -el
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 IMAGE=buildslave_image
@@ -21,11 +21,14 @@ EOF
 fi
 
 # Docker image
-docker build -t ${IMAGE} deploy
+time ./scripts/docker_build_images.sh images buildworker
 
-if [ -f deploy/.prepare_done ]; then
-  rm deploy/.prepare_done
-fi
+(
+  cd downloads
+  [ -f docker.tgz ] || wget -O docker.tgz http://get.docker.com/builds/Linux/x86_64/docker-1.12.3.tgz
+  echo "626601deb41d9706ac98da23f673af6c0d4631c4d194a677a9a1a07d7219fa0f  docker.tgz" | sha256sum -c -
+  tar -xzf docker.tgz docker/docker
+)
 
 if [ ! -f .create.sh ]; then
 cat > .create.sh <<EOF
@@ -35,7 +38,6 @@ P=$(pwd)
 CONTAINER=${CONTAINER}
 IMAGE=${IMAGE}
 
-rm deploy/.prepare_done
 docker stop \${CONTAINER}
 docker rm \${CONTAINER}
 docker run -it \\

@@ -12,7 +12,9 @@ if [[ -n "${BUILD_INIT_CI}" || "$1 $2" == "ci init" ]]; then
 fi
 
 # limit resources for spawned processes
-echo $$ > /sys/fs/cgroup/memory/build_buildenv/tasks
+[ ! -d /sys/fs/cgroup/memory/build_buildenv ] || echo $$ > /sys/fs/cgroup/memory/build_buildenv/tasks
+
+. /app/scripts/container_helpers.sh
 
 if [ -n "${BUILD_INITIALIZE}" ]; then
   set +e
@@ -20,20 +22,25 @@ if [ -n "${BUILD_INITIALIZE}" ]; then
   rm opencv_extra/.git/index.lock 2>/dev/null
   rm opencv_contrib/.git/index.lock 2>/dev/null
   rm opencv_extra/.git/refs/heads/master.lock 2>/dev/null
-  exit 0
+  opencv_worker_container_create ${BUILD_IMAGE:-opencv-ubuntu:14.04}
+  opencv_worker_container_exec echo "Initialize"
+  unset BUILD_INITIALIZE
+  opencv_worker_container_exec cmake "--version"
+  opencv_worker_container_exec ls -al /dev
+  opencv_worker_container_exec ls -aln /dev/dri || true
+  opencv_worker_container_exec id
+  opencv_worker_container_exec bash -c "export; id; whoami"
+  #opencv_worker_container_exec sleep 30
+  exit $?
 fi
-export ANDROID_NDK="/opt/android/android-ndk-r9/"
-export ANDROID_SDK="/opt/android/android-sdk-linux/"
-export NDKROOT=${ANDROID_NDK}
+if [ -n "${BUILD_CLEANUP}" ]; then
+  opencv_worker_container_cleanup
+  exit $?
+fi
 
-if [ -n "${BUILD_PRECOMMIT}" ]; then
-  export PATH="/usr/lib/ccache:$PATH"
-  export CCACHE_DIR=/build/.ccache
-  export CCACHE_SLOPPINESS=pch_defines,time_macros,file_macro
-  # Doesn't work in docker: export CCACHE_HARDLINK=1
-  # export CCACHE_LOGFILE=/build/.ccache/ccache.log
-fi
-#export CXXFLAGS="-Wno-array-bounds"
+export ANDROID_NDK=${ANDROID_NDK:-/opt/android/android-ndk-r10e/}
+export ANDROID_SDK=${ANDROID_SDK:-/opt/android/android-sdk-java7/}
+export NDKROOT=${ANDROID_NDK}
 
 if [[ "$1" == "ci" ]]; then
   shift
@@ -43,6 +50,7 @@ if [[ "$1" == "ci" ]]; then
     SCRIPT=./ci/linux-${BUILD_CI_TARGET_OS}/$1
   fi
   shift
-  exec $SCRIPT $@
+  exec $SCRIPT "$@"
 fi
-exec $@
+
+opencv_worker_container_exec "$@"

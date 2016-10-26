@@ -1,0 +1,3 @@
+echo "Initializing..."
+cp -rf /opt/build-worker/arm-linux-gnueabihf/* /usr/arm-linux-gnueabihf/
+echo "Done"
