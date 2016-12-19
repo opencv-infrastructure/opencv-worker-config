@@ -1,20 +1,36 @@
-#!/bin/bash
+#!/bin/bash -e
 
-mkdir /Users/build/bin
-cp scripts/buildenv /Users/build/bin
+if [ "$(id -u)" == 0 ]; then
+  echo "Unexpected root user".
+  exit 1
+fi
+
+export
+
+virtualenv /opt/pythonenv
+. /opt/pythonenv/bin/activate
+
+pip install --upgrade pip
+
+cd /opt/build
+(
+cd buildbot/slave
+pip install -e .
+)
+
+. /opt/build/scripts/profile.sh
 
 cp -rf /opt/build/config/info /build/
 [[ -d /build-2 ]] && cp -rf /opt/build/config/info /build-2/
 [[ -d /build-3 ]] && cp -rf /opt/build/config/info /build-3/
 
 mkdir -p /build/_repos
-cd /build/_repos
-/opt/build/scripts/build_clone_repositories.sh /build
-[ -d /build-2 ] && /opt/build/scripts/build_clone_repositories.sh /build-2
-[ -d /build-3 ] && /opt/build/scripts/build_clone_repositories.sh /build-3
+(
+  cd /build/_repos
+  /opt/build/scripts/build_clone_repositories.sh /build || true
+  [ -d /build-2 ] && /opt/build/scripts/build_clone_repositories.sh /build-2 || true
+  [ -d /build-3 ] && /opt/build/scripts/build_clone_repositories.sh /build-3 || true
+)
 
-cd /opt/build
-
-# TODO configure automatic start:
-# buildslave restart
-
+echo "Deploy: done"
+exit 0

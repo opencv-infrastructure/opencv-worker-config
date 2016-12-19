@@ -6,11 +6,14 @@ if [ $# -eq 0 ]; then
 fi
 
 DIR=$(pwd)
-git clone --bare git://github.com/opencv/opencv.git
-git clone --bare git://github.com/opencv/opencv_extra.git
-git clone --bare git://github.com/opencv/opencv_contrib.git
+OPENCV_GIT_URL=${OPENCV_GIT_URL:-https://github.com/opencv}
+git clone --bare ${OPENCV_GIT_URL}/opencv.git
+git clone --bare ${OPENCV_GIT_URL}/opencv_extra.git
+git clone --bare ${OPENCV_GIT_URL}/opencv_contrib.git
 
 pushd ${1}
+
+set +e
 
 for d in ./*; do
   if [[ -d "$d" ]] && [[ $d != "_repos" ]] && [[ $d != *logs ]] && [[ $d != *info ]]; then
@@ -33,3 +36,5 @@ for d in ./*; do
 done
 
 popd
+
+exit 0

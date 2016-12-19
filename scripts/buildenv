@@ -1,11 +1,6 @@
 #!/bin/bash
 export LC_ALL=C
 export LANG=en_US.UTF-8
-export CXXFLAGS="-Wno-array-bounds"
-export ANDROID_NDK=/opt/android/android-ndk-r10e
-export ANDROID_SDK=/opt/android/android-sdk-macosx
-#export PATH=$PATH:${ANDROID_SDK}/platform-tools
-export PLANTUML_JAR=/Users/build/bin/plantuml.jar
 if [ -n "$BUILD_INITIALIZE" ]; then
   rm opencv/.git/index.lock 2>/dev/null
   rm opencv_extra/.git/index.lock 2>/dev/null
@@ -13,5 +8,5 @@ if [ -n "$BUILD_INITIALIZE" ]; then
   rm opencv_extra/.git/refs/heads/master.lock 2>/dev/null
   exit 0
 fi
-$@
-exit $?
+
+exec $@
