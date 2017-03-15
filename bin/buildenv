@@ -25,11 +25,11 @@ if [ -n "${BUILD_INITIALIZE}" ]; then
   opencv_worker_container_create ${BUILD_IMAGE:-opencv-ubuntu:14.04}
   opencv_worker_container_exec echo "Initialize"
   unset BUILD_INITIALIZE
-  opencv_worker_container_exec cmake "--version"
-  opencv_worker_container_exec ls -al /dev
-  opencv_worker_container_exec ls -aln /dev/dri || true
-  opencv_worker_container_exec id
-  opencv_worker_container_exec bash -c "export; id; whoami"
+#  opencv_worker_container_exec cmake "--version"
+#  opencv_worker_container_exec ls -al /dev
+#  opencv_worker_container_exec ls -aln /dev/dri || true
+#  opencv_worker_container_exec id
+#  opencv_worker_container_exec bash -c "export; id; whoami"
   #opencv_worker_container_exec sleep 30
   exit $?
 fi

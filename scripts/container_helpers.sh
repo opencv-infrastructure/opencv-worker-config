@@ -90,7 +90,8 @@ opencv_worker_container_exec()
   printf "%q " "$@" >> $JOB_FILE
   echo "" >> $JOB_FILE
 
-  cat $JOB_FILE
+  #DEBUG
+  #cat $JOB_FILE
 
   # "docker exec" doesn't:
   # - terminate child processes automatically
