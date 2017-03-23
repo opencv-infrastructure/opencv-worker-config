@@ -7,7 +7,7 @@ mkdir -p /build/logs
 {
   mkdir -p /build/_repos
   (
-    cd /build/_repos; ./scripts/build_clone_repositories.sh /build
+    cd /build/_repos; /opt/build/scripts/build_clone_repositories.sh /build
   )
 }
 
