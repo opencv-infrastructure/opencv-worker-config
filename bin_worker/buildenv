@@ -2,7 +2,10 @@
 
 CCACHE_VERSION=$(ccache --version | head -n 1 | tr ' ' '\n' | tail -n1)
 if [ -n "${CCACHE_VERSION}" ]; then
-  # Don't mix ccache storages with different versions
+  # Don't mix ccache storages with different versions or platforms
+  if [[ "$(getconf LONG_BIT)" != "64" ]]; then
+    CCACHE_VERSION="${CCACHE_VERSION}_$(getconf LONG_BIT)"
+  fi
   export CCACHE_DIR=/build/.ccache/ver_${CCACHE_VERSION}
   export CCACHE_SLOPPINESS=pch_defines,time_macros,file_macro
   export CCACHE_CPP2=true
