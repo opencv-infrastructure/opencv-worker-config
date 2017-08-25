@@ -1,4 +1,4 @@
-FROM opencv-ubuntu:14.04
+FROM opencv-ubuntu:16.04
 
 RUN \
   apt-get update && \
