@@ -20,3 +20,10 @@ RUN \
   echo "295e2fcd74a5c6ec46188958ab495e61  doxygen-1.8.12.linux.bin.tar.gz" > md5sum -c - && \
   mkdir -p /opt/doxygen && tar -xzf doxygen-1.8.12.linux.bin.tar.gz -C /opt/doxygen && \
   rm -f doxygen-1.8.12.linux.bin.tar.gz
+
+RUN \
+  apt-get update && \
+  apt-get install -y --no-install-recommends \
+    pylint \
+    && \
+  rm -rf /var/lib/apt/lists/*
