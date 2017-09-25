@@ -1,0 +1,17 @@
+#!/bin/bash -x
+
+EMSDK_DIR=/opt/emsdk-portable
+
+mkdir -p $EMSDK_DIR
+cp /opt/build-worker/emsdk/* $EMSDK_DIR || true
+chown -R build:build $EMSDK_DIR
+ln -s /opt/build-worker/emsdk/clang $EMSDK_DIR/clang
+ln -s /opt/build-worker/emsdk/emscripten $EMSDK_DIR/emscripten
+ln -s /opt/build-worker/emsdk/node $EMSDK_DIR/node
+
+cp /opt/build-worker/emsdk/home/.em* /home/build/
+chown build:build /home/build/.em*
+
+exec su - build -c "bash -x /app/deploy/images/prepare-docs-js-user"
+
+echo "1"

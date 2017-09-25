@@ -5,4 +5,4 @@ host_mountpoint()
 
 # attach Intel iGPU
 # DOCKER_OPTS="--device=/dev/dri:/dev/dri"
-DOCKER_OPTS="$DOCKER_OPTS -v /opt:/opt:ro"
+DOCKER_OPTS="$DOCKER_OPTS -v /opt/build-worker:/opt/build-worker:ro"
