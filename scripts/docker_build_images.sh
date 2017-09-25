@@ -2,7 +2,7 @@
 IMAGES_DIR=$1
 shift
 
-if type "proxy_setup" >/dev/null; then
+if type "proxy_setup" 2>/dev/null; then
   proxy_setup
 fi
 #if [ -n "$HTTP_PROXY" ]; then
@@ -68,9 +68,11 @@ if [ "$#" -ge 1 ]; then
     build_image $image
   done
 else
+  echo "Build images from: $IMAGES_DIR"
   for image in $IMAGES_DIR/*; do
     if [ -d $image ]; then
       build_image $(basename "$image")
     fi
   done
 fi
+echo "Done: $(date)"
