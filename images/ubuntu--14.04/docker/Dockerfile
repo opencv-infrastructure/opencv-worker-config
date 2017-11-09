@@ -25,6 +25,14 @@ RUN \
 RUN \
   apt-get update && \
   apt-get install -y --no-install-recommends \
-    abi-compliance-checker gcc-4.6 g++-4.6 ctags \
+    ctags \
     && \
   rm -rf /var/lib/apt/lists/*
+
+RUN \
+  wget -O /tmp/abi-compliance-checker-2.2.tar.gz https://github.com/lvc/abi-compliance-checker/archive/2.2.tar.gz && \
+  echo "9fb7b17e33d49e301d02a6374fbd2596feb53ecc77194879a4e1c2d1e24b4ddb /tmp/abi-compliance-checker-2.2.tar.gz" | sha256sum -c && \
+  mkdir -p /opt/ && cd /opt/ && \
+  tar -xf /tmp/abi-compliance-checker-2.2.tar.gz && \
+  cd abi-compliance-checker-2.2/ && \
+  chmod +x abi-compliance-checker.pl
