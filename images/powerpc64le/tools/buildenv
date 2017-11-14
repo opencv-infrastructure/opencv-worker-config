@@ -1,0 +1,11 @@
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo "BUILD-PROP run_abi_check=0" >&2
+  echo "BUILD-PROP run_tests=0" >&2
+  exit 0
+fi
+
+if [[ "$1" == *cmake* && "$2" != "--build" ]]; then
+  set -- "$@" "-DCMAKE_TOOLCHAIN_FILE=/tools/cmake/powerpc64le-toolchain.cmake"
+fi
+
+exec "$@"

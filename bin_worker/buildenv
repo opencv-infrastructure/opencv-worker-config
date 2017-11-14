@@ -42,6 +42,12 @@ script_name=$(get_image_script $BUILD_IMAGE)
 if [ -n "${script_name}" ]; then
   . "${script_name}" "$@"
   exit $?
-else
-  exec "$@"
 fi
+
+script_name="/tools/buildenv"
+if [ -f "${script_name}" ]; then
+  . "${script_name}" "$@"
+  exit $?
+fi
+
+exec "$@"

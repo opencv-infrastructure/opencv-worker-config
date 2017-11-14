@@ -38,6 +38,7 @@ opencv_worker_container_create()
     return 1
   fi
 
+  local DOCKER_IMAGE_BASE=$(echo ${DOCKER_IMAGE} | sed 's/^opencv-//g' | sed 's/:/--/g')
   local NAME="opencv_build_$(basename $WORK_DIR)_$$"
 
   DOCKER_OPTS="$DOCKER_OPTS --name $NAME"
@@ -45,6 +46,7 @@ opencv_worker_container_create()
   . /app/scripts/container_options.sh
   DOCKER_OPTS="$DOCKER_OPTS -v $(host_mountpoint /app/deploy_worker):/app/deploy:ro"
   DOCKER_OPTS="$DOCKER_OPTS -v $(host_mountpoint /app/bin_worker):/app/bin:ro"
+  DOCKER_OPTS="$DOCKER_OPTS -v $(host_mountpoint /app/images/${DOCKER_IMAGE_BASE}/tools):/tools:ro"
   DOCKER_OPTS="$DOCKER_OPTS -v $(host_mountpoint $WORK_DIR):$WORK_DIR:rw"
   DOCKER_OPTS="$DOCKER_OPTS --env BASE_DIR=$WORK_DIR"
   DOCKER_OPTS="$DOCKER_OPTS --env BUILD_IMAGE=$DOCKER_IMAGE"
