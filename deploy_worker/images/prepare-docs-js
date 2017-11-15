@@ -13,5 +13,3 @@ cp /opt/build-worker/emsdk/home/.em* /home/build/
 chown build:build /home/build/.em*
 
 exec su - build -c "bash -x /app/deploy/images/prepare-docs-js-user"
-
-echo "1"

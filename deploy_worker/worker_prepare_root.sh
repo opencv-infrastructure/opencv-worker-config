@@ -26,6 +26,12 @@ if [ -n "${script_name}" ]; then
   . "${script_name}" "$@"
 fi
 
+script_name="/tools/prepare_root.sh"
+if [ -f "${script_name}" ]; then
+  . "${script_name}" "$@"
+  exit $?
+fi
+
 #[ ! -d /opt/arm-linux-gnueabihf ] || cp -rf /opt/arm-linux-gnueabihf/* /usr/arm-linux-gnueabihf/
 
 #[ ! -d /opt/packages/ceres/build ] ||

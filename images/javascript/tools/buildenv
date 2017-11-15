@@ -1,0 +1,22 @@
+# .bashrc is not loaded into non-interactive Docker containers
+. /home/build/.nvm/nvm.sh
+
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo 'BUILD-PROP stages="build,test_js"' >&2
+  exit 0
+fi
+
+if [ "${BUILD_STAGE}" == "build" ]; then
+  . /opt/emsdk-portable/emsdk_env.sh
+  set -x
+  exec python ${BUILD_SRC_OPENCV}/platforms/js/build_js.py . --build_test
+fi
+
+if [ "${BUILD_STAGE}" == "test_js" ]; then
+  set -x
+  exec bash -ex /tools/test_js.sh
+fi
+
+>&2 echo "FATAL: Invalid configuration detected:"
+export
+exit 1

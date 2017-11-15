@@ -1,5 +1,6 @@
 #!/bin/bash -el
 IMAGES_DIR=$1
+ROOT_DIR=`cd "$1"/.. && pwd`
 shift
 
 if type "proxy_setup" 2>/dev/null; then
@@ -55,9 +56,25 @@ build_image()
   (
     echo "Processing image: $docker_image ($image)"
     cd $IMAGES_DIR/$image/docker
-    time docker build $DOCKER_BUILD_ARGS -t $docker_image .
+    time docker build $DOCKER_BUILD_ARGS -t $docker_image-staging .
     echo "Done at $(date '+%Y-%m-%d %H:%M:%S'): $docker_image ($image)"
-
+    cd ..
+    if [ -d post-build ]; then
+      set -x
+      WORKDIR=/app/images/$image/post-build
+      docker rm $docker_image-preparing || /bin/true
+      time docker run -it --name $docker_image-preparing \
+          -v ${ROOT_DIR}:/app:ro \
+          -v /opt:/opt:rw \
+          $docker_image-staging \
+          ${WORKDIR}/entry.sh "${WORKDIR}" "$image"
+      time docker commit $docker_image-preparing $docker_image
+      docker rm $docker_image-preparing || /bin/true
+      docker rmi --no-prune $docker_image-staging || /bin/true
+    else
+      time docker tag $docker_image-staging $docker_image
+      docker rmi --no-prune $docker_image-staging || /bin/true
+    fi
   )
   PROCESSED_IMAGES+=("$docker_image")
 }
