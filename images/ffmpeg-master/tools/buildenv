@@ -1,0 +1,8 @@
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo "BUILD-PROP run_abi_check=0" >&2
+  exit 0
+fi
+
+export PKG_CONFIG_PATH=/opt/ffmpeg/lib/pkgconfig/:${PKG_CONFIG_PATH}
+
+exec "$@"

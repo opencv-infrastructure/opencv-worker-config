@@ -56,24 +56,30 @@ build_image()
   (
     echo "Processing image: $docker_image ($image)"
     cd $IMAGES_DIR/$image/docker
-    time docker build $DOCKER_BUILD_ARGS -t $docker_image-staging .
-    echo "Done at $(date '+%Y-%m-%d %H:%M:%S'): $docker_image ($image)"
-    cd ..
-    if [ -d post-build ]; then
+    if [ -d ../post-build ]; then
+      time docker build $DOCKER_BUILD_ARGS -t staging-$docker_image .
+      echo "Docker build completed at $(date '+%Y-%m-%d %H:%M:%S'): $docker_image ($image)"
+      (
       set -x
+      CONTAINER_NAME="preparing-$docker_image"
+      CONTAINER_NAME=${CONTAINER_NAME//[^A-Za-z0-9._-]/_}
       WORKDIR=/app/images/$image/post-build
-      docker rm $docker_image-preparing || /bin/true
-      time docker run -it --name $docker_image-preparing \
+      docker rm ${CONTAINER_NAME} || /bin/true
+      time docker run -it --name ${CONTAINER_NAME} \
           -v ${ROOT_DIR}:/app:ro \
-          -v /opt:/opt:rw \
-          $docker_image-staging \
+          -v /opt/build-worker:/opt/build-worker:ro \
+          -v /opt/build-containers-cache:/opt/build-containers-cache:rw \
+          -v /opt/android:/opt/android:ro \
+          staging-$docker_image \
           ${WORKDIR}/entry.sh "${WORKDIR}" "$image"
-      time docker commit $docker_image-preparing $docker_image
-      docker rm $docker_image-preparing || /bin/true
-      docker rmi --no-prune $docker_image-staging || /bin/true
+      time docker commit ${CONTAINER_NAME} $docker_image
+      docker rm ${CONTAINER_NAME} || /bin/true
+      docker rmi --no-prune staging-$docker_image || /bin/true
+      )
+      echo "Done at $(date '+%Y-%m-%d %H:%M:%S'): $docker_image ($image)"
     else
-      time docker tag $docker_image-staging $docker_image
-      docker rmi --no-prune $docker_image-staging || /bin/true
+      time docker build $DOCKER_BUILD_ARGS -t $docker_image .
+      echo "Done at $(date '+%Y-%m-%d %H:%M:%S'): $docker_image ($image)"
     fi
   )
   PROCESSED_IMAGES+=("$docker_image")
