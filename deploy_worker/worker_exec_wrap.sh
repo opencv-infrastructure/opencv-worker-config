@@ -7,7 +7,12 @@ fi
 # "docker exec" setup PATH env with "sbin" directories
 export PATH=/app/bin:/usr/local/bin:/usr/bin:/bin
 # there are issues with ldconfig for OpenCL libraries
-export LD_LIBRARY_PATH=/opt/intel/opencl/:${LD_LIBRARY_PATH}
+if [ -d /opt/intel/opencl/ ]; then
+  export LD_LIBRARY_PATH=/opt/intel/opencl/:${LD_LIBRARY_PATH}
+fi
+if [ -d /opt/amdgpu-pro ]; then
+  export LD_LIBRARY_PATH=/opt/amdgpu-pro/lib/x86_64-linux-gnu:/opt/amdgpu-pro/lib/i386-linux-gnu:${LD_LIBRARY_PATH}
+fi
 # restore missing USER
 export USER=build # $(whoami)
 
