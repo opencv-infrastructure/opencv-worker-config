@@ -27,3 +27,11 @@ RUN \
     pylint \
     && \
   rm -rf /var/lib/apt/lists/*
+
+RUN \
+  apt-get update && \
+  apt-get install -y --no-install-recommends \
+    python-bs4 \
+    python3-bs4 \
+    && \
+  rm -rf /var/lib/apt/lists/*
