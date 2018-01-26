@@ -35,3 +35,10 @@ RUN \
     python3-bs4 \
     && \
   rm -rf /var/lib/apt/lists/*
+
+RUN \
+  apt-get update && \
+  apt-get install -y --no-install-recommends \
+    ant ant-optional default-jdk \
+    && \
+  rm -rf /var/lib/apt/lists/*
