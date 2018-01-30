@@ -18,4 +18,4 @@ chown build:build /home/build
 
 /app/deploy/worker_prepare_root.sh
 
-exec su - build -c "cd $BASE_DIR; . /app/deploy/worker_launch.sh"
+su - build -c "cd $BASE_DIR; . /app/deploy/worker_launch.sh"
