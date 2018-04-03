@@ -20,6 +20,7 @@ if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
   ARGS+=("-DWITH_CUBLAS=ON")
   ARGS+=("-DWITH_CUFFT=ON")
   ARGS+=("-DWITH_NVCUVID=ON")
+  # fixed in #11292: ARGS+=("-DCUDA_NVCC_FLAGS=--std=c++11\;--expt-relaxed-constexpr")
   set -- "${ARGS[@]}"
 fi
 

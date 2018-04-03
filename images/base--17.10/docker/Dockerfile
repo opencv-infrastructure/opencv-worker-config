@@ -5,6 +5,7 @@ RUN \
   apt-get install -y --no-install-recommends \
     software-properties-common \
     curl git htop man zip unzip vim wget ncdu mc nano time \
+    file \
     && \
   rm -rf /var/lib/apt/lists/*
 
