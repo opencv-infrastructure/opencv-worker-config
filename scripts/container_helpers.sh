@@ -114,3 +114,15 @@ opencv_worker_container_exec()
   STATUS=$(cat ${JOB_FILE}_status || echo 1)
   return $STATUS
 }
+
+opencv_worker_container_dump_diff()
+{
+  local WORK_DIR=${1:-$PWD}
+
+  echo "diff:"$(printf " '%q'" "$@") >> /app/logs/container.logs
+
+  local DOCKER_CONTAINER=$(cat $WORK_DIR/.container/ID)
+  echo "diff container: $DOCKER_CONTAINER" >> /app/logs/container.logs
+
+  $DOCKER diff "$DOCKER_CONTAINER" || true
+}
