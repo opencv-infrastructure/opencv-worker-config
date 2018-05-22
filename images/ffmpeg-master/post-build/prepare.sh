@@ -15,7 +15,7 @@ git describe || git clone https://github.com/FFmpeg/FFmpeg.git .
 git reset --hard || true
 git clean -f -d || true
 git fetch origin
-git checkout -B master n3.4 #origin/master
+git checkout -B master n4.0 #origin/master
 DESCRIBE=`git describe`
 echo "FFmpeg: ${DESCRIBE}"
 
