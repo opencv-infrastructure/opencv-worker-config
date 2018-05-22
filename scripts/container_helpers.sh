@@ -42,7 +42,9 @@ opencv_worker_container_create()
   local NAME="opencv_build_$(basename $WORK_DIR)_$$"
 
   DOCKER_OPTS="$DOCKER_OPTS --name $NAME"
-  DOCKER_OPTS="$DOCKER_OPTS --memory 6G"
+  if [[ -z "${BUILD_BIGDATA}" ]]; then
+    DOCKER_OPTS="$DOCKER_OPTS --memory 6G"
+  fi
   . /app/scripts/container_options.sh
   DOCKER_OPTS="$DOCKER_OPTS -v $(host_mountpoint /app/deploy_worker):/app/deploy:ro"
   DOCKER_OPTS="$DOCKER_OPTS -v $(host_mountpoint /app/bin_worker):/app/bin:ro"
