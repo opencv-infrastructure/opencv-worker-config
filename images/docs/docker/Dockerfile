@@ -42,3 +42,10 @@ RUN \
     ant ant-optional default-jdk \
     && \
   rm -rf /var/lib/apt/lists/*
+
+RUN \
+  apt-get update && \
+  apt-get install -y --no-install-recommends \
+    flake8 \
+    && \
+  rm -rf /var/lib/apt/lists/*

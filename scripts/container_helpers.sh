@@ -86,7 +86,7 @@ opencv_worker_container_exec()
   echo "$BASE_DIR exec:"$(printf " '%q'" "$@") >> /app/logs/container.logs
 
   JOB_FILE=$BASE_DIR/.container/job_$$
-  export | grep -E '^declare \-x (BUILD_|OPENCV|PYTHON|JAVA|ANDROID|ADB|http_proxy|https_proxy|HTTPS_PROXY)' > $JOB_FILE || true
+  export | grep -E '^declare \-x (BUILD_|OPENCV|PYTHON|JAVA|ANDROID|ADB|http_proxy|https_proxy|HTTPS_PROXY|VERBOSE)' > $JOB_FILE || true
   echo "cd $WORK_DIR" >> $JOB_FILE
   echo -n "/app/bin/buildenv " >> $JOB_FILE
   printf "%q " "$@" >> $JOB_FILE
