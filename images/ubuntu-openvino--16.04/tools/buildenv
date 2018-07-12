@@ -1,0 +1,18 @@
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo "BUILD-PROP run_abi_check=0" >&2
+  exit 0
+fi
+
+. /opt/intel/computer_vision_sdk/bin/setupvars.sh
+
+if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
+  ARGS=("$@")
+  ARGS+=("-DENABLE_CXX11=ON")
+  ARGS+=("-DWITH_INF_ENGINE=ON")
+  ARGS+=("-DINF_ENGINE_ROOT_DIR=${InferenceEngine_DIR}/..")
+  ARGS+=("-DIE_PLUGINS_PATH=${InferenceEngine_DIR}/../lib/ubuntu_16.04/intel64/")
+  set -- "${ARGS[@]}"
+fi
+
+
+exec "$@"
