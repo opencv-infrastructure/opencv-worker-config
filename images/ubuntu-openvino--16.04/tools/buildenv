@@ -3,7 +3,10 @@ if [ -n "${BUILD_INITIALIZE}" ]; then
   exit 0
 fi
 
+# save and restore PYTHONPATH (we don't want to test OpenVINO OpenCV bindings here)
+PYTHONPATH_SAVED=${PYTHONPATH}
 . /opt/intel/computer_vision_sdk/bin/setupvars.sh
+export PYTHONPATH=${PYTHONPATH_SAVED}
 
 if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
   ARGS=("$@")
