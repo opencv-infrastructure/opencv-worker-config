@@ -12,8 +12,7 @@ if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
   ARGS=("$@")
   ARGS+=("-DENABLE_CXX11=ON")
   ARGS+=("-DWITH_INF_ENGINE=ON")
-  ARGS+=("-DINF_ENGINE_ROOT_DIR=${InferenceEngine_DIR}/..")
-  ARGS+=("-DIE_PLUGINS_PATH=${InferenceEngine_DIR}/../lib/ubuntu_16.04/intel64/")
+  ARGS+=("-DINF_ENGINE_RELEASE=2018020000")
   set -- "${ARGS[@]}"
 fi
 
