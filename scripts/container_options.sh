@@ -12,6 +12,10 @@ get_image_script()
   fi
 }
 
+script_name=$(get_image_script $BUILD_IMAGE-pre)
+if [ -n "${script_name}" ]; then
+  . "${script_name}" "$@"
+fi
 script_name=$(get_image_script all)
 if [ -n "${script_name}" ]; then
   . "${script_name}" "$@"

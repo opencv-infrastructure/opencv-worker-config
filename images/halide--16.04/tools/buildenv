@@ -1,0 +1,16 @@
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo "BUILD-PROP run_abi_check=0" >&2
+  exit 0
+fi
+
+export HALIDE_ROOT_DIR=/opt/build-worker/halide/halide/build
+
+if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
+  ARGS=("$@")
+  ARGS+=("-DENABLE_CXX11=ON")
+  ARGS+=("-DWITH_HALIDE=ON")
+  set -- "${ARGS[@]}"
+fi
+
+
+exec "$@"
