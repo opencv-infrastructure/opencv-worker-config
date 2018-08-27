@@ -94,7 +94,9 @@ else
   echo "Build images from: $IMAGES_DIR"
   for image in $IMAGES_DIR/*; do
     if [ -d $image ]; then
-      build_image $(basename "$image")
+      if [[ ! -f "$image/.image_skip_auto_build" || -f "$image/.image_force_build" ]]; then
+        build_image $(basename "$image")
+      fi
     fi
   done
 fi
