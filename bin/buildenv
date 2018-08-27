@@ -39,6 +39,12 @@ if [ -n "${BUILD_FINALIZE}" ]; then
   if [ -n "${BUILD_SRC_OPENCV_CONTRIB}" ]; then (set -e; cd $BUILD_SRC_OPENCV_CONTRIB; echo "Contrib:"; git status) fi
   if [ -n "${BUILD_SRC_OPENCV_EXTRA}" ]; then (set -e; cd $BUILD_SRC_OPENCV_EXTRA; echo "Extra:"; git status) fi
   opencv_worker_container_dump_diff
+  if [ ! -n "${BUILD_PRECOMMIT}" ]; then
+    (cd build;
+      make clean >/dev/null 2>&1 || true
+      ninja clean >/dev/null 2>&1 || true
+    )
+  fi
   exit $?
 fi
 if [ -n "${BUILD_CLEANUP}" ]; then
