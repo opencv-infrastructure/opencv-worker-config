@@ -1,5 +1,0 @@
-#if [[ "$1" == "cmake" ]]; then
-#  shift
-#  exec cmake3 "$@"
-#fi
-exec "$@"
