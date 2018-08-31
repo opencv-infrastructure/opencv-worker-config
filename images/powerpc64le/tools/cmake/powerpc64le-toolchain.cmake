@@ -6,6 +6,8 @@ set(CMAKE_CXX_COMPILER /usr/bin/powerpc64le-linux-gnu-g++-7)
 
 set(CMAKE_FIND_ROOT_PATH /usr/powerpc64le-linux-gnu)
 
-SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY)
-SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+if(EXISTS "${CMAKE_SOURCE_DIR}/modules/core")
+  include("${CMAKE_SOURCE_DIR}/platforms/linux/gnu.toolchain.cmake")
+else()
+  # we are in try_compile case
+endif()
