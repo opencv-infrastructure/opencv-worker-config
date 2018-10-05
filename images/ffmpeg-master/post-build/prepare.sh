@@ -11,11 +11,12 @@ rsync -axHAX /opt/build-containers-cache/ffmpeg/.git /home/build/sources/ffmpeg/
 
 pushd /home/build/sources/ffmpeg
 
-git describe || git clone https://github.com/FFmpeg/FFmpeg.git .
+set -x
+git describe || (rm -rf ./.git && git clone https://github.com/FFmpeg/FFmpeg.git .)
 git reset --hard || true
 git clean -f -d || true
 git fetch origin
-git checkout -B master n4.0 #origin/master
+git checkout -B master n4.0.2 #origin/master
 DESCRIBE=`git describe`
 echo "FFmpeg: ${DESCRIBE}"
 
@@ -25,7 +26,8 @@ rsync -avxHAX --delete --checksum /home/build/sources/ffmpeg/.git /opt/build-con
 ./configure --prefix=/opt/ffmpeg --enable-avresample \
   --enable-pic --disable-asm --disable-debug \
   --disable-cuda --disable-cuvid \
-  --disable-ffmpeg --disable-ffserver
+  --disable-ffmpeg \
+|| (./configure --help; false)
 
 make install -j5
 

@@ -6,14 +6,13 @@ fi
 if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
   ARGS=()
   for arg in "$@"; do
-    if [[ "$arg" == "-DWITH_QT=OFF" ]]; then
-      echo "Removing -DWITH_QT=OFF option"
+    if [[ "$arg" == "-DWITH_OPENMP=OFF" ]]; then
+      echo "Removing -DWITH_OPENMP=OFF option"
     else
       ARGS+=("$arg")
     fi
   done
-  ARGS+=("-DWITH_QT=ON")
-  ARGS+=("-DWITH_OPENGL=ON")
+  ARGS+=("-DWITH_OPENMP=ON")
   set -- "${ARGS[@]}"
 fi
 

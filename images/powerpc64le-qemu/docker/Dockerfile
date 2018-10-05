@@ -1,8 +1,8 @@
-FROM opencv-ubuntu:18.04
+FROM opencv-powerpc64le
 
 RUN \
   apt-get update && \
   apt-get install -y --no-install-recommends \
-    rsync \
+    qemu-user \
     && \
   rm -rf /var/lib/apt/lists/*

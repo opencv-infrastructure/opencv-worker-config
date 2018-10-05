@@ -1,0 +1,33 @@
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo "BUILD-PROP run_abi_check=0" >&2
+  echo "BUILD-PROP run_tests=1" >&2
+  exit 0
+fi
+
+if [[ "$1" == *cmake* && "$2" != "--build" ]]; then
+  set -- "$@" "-DCMAKE_TOOLCHAIN_FILE=/tools/cmake/powerpc64le-toolchain.cmake" "-DCMAKE_SKIP_RPATH=OFF"
+fi
+
+if [[ "$1" == python ]]; then
+  shift
+  set -- python3 "$@"
+fi
+
+if [[ "$1" == *python* && "$2" == *run.py && "$3" != "--list"* ]]; then
+  ARGS=()
+  for arg in "$@"; do
+    if [[ "$arg" == python ]]; then
+      ARGS+=("python3")
+    elif [[ "$arg" == *run.py ]]; then
+      ARGS+=("$arg")
+      ARGS+=("--qemu=qemu-ppc64le -cpu POWER9 -L /usr/powerpc64le-linux-gnu")
+    else
+      ARGS+=("$arg")
+    fi
+  done
+  set -- "${ARGS[@]}"
+fi
+
+echo "Run: $@"
+
+exec "$@"

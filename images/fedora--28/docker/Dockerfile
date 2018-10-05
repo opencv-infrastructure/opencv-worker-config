@@ -24,3 +24,9 @@ RUN \
     ctags \
     && \
   dnf clean all
+
+RUN \
+  dnf install -y \
+    tbb-devel ninja-build \
+    && \
+  dnf clean all

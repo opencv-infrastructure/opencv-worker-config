@@ -1,0 +1,9 @@
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo "BUILD-PROP run_abi_check=0" >&2
+  exit 0
+fi
+
+export CC=clang
+export CXX=clang++
+
+exec "$@"
