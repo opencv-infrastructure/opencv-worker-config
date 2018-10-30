@@ -32,5 +32,14 @@ mkdir -p /build/_repos
   [ -d /build-3 ] && /opt/build/scripts/build_clone_repositories.sh /build-3 || true
 )
 
+# CMake finds Python via Framework. Make a link for homebrew's python@2 package.
+[ -d ${HOME}/Library/Frameworks/Python.framework ] ||
+{
+  mkdir -p ${HOME}/Library/Frameworks/
+  list=( /usr/local/Cellar/python@2/2.7* )
+  python_framework="${list[${#list[@]}-1]}"
+  ln -s ${python_framework}/Frameworks/Python.framework ${HOME}/Library/Frameworks/
+}
+
 echo "Deploy: done"
 exit 0
