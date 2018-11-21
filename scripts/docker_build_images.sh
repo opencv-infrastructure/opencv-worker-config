@@ -134,8 +134,15 @@ if [ "$#" -ge 1 ]; then
   done
 else
   echo "Build images from: $IMAGES_DIR"
+  IMAGES_TO_SKIP=( test )
+  for cfg in $IMAGES_DIR/.images_skip_auto_build*; do
+    echo "... reading: $cfg"
+    readarray lines < "$cfg"
+    IMAGES_TO_SKIP+=(${lines[@]})
+  done
   for image in $IMAGES_DIR/*; do
     BASENAME=$(basename "$image")
+    containsElement "$BASENAME" "${IMAGES_TO_SKIP[@]}" && continue
     if [ -d $image ]; then
       if [[ ! -f "$image/.image_skip_auto_build" || -f "$image/.image_force_build" ]]; then
         build_image "$BASENAME" || /bin/true
