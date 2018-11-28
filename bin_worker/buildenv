@@ -44,6 +44,10 @@ if [ -n "${script_name}" ]; then
   exit $?
 fi
 
+if [ -d "/tools" ]; then
+  export PATH=$PATH:/tools
+fi
+
 script_name="/tools/buildenv"
 if [ -f "${script_name}" ]; then
   . "${script_name}" "$@"

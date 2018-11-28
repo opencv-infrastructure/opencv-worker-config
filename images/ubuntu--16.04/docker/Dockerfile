@@ -28,3 +28,11 @@ RUN \
     ninja-build \
     && \
   rm -rf /var/lib/apt/lists/*
+
+RUN \
+  wget -O /tmp/abi-compliance-checker-2.3.tar.gz https://github.com/lvc/abi-compliance-checker/archive/2.3.tar.gz && \
+  echo "b1e32a484211ec05d7f265ab4d2c1c52dcdb610708cb3f74d8aaeb7fe9685d64 /tmp/abi-compliance-checker-2.3.tar.gz" | sha256sum -c && \
+  mkdir -p /opt/ && cd /opt/ && \
+  tar -xf /tmp/abi-compliance-checker-2.3.tar.gz && \
+  cd abi-compliance-checker-2.3/ && \
+  chmod +x abi-compliance-checker.pl
