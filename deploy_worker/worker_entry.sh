@@ -1,5 +1,9 @@
 #!/bin/bash -ex
 
+pwd
+export
+export BUILD_DIR=$(basename "$BASE_DIR")
+
 getent passwd build || {
   groupadd -r build -g $APP_GID
   useradd -u $APP_UID -r -g build -d /home/build -m -s /bin/bash -c "Build user" build
