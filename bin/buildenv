@@ -6,9 +6,14 @@ if [[ -n "${BUILD_INIT_CI}" || "$1 $2" == "ci init" ]]; then
     [ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1 || git clone --depth=10 ${BUILD_CI_URL} . 1>&2
     git fetch ${BUILD_CI_URL} ${BUILD_CI_BRANCH:-HEAD} 1>&2 && git reset --hard 1>&2 && git clean -f -d -x 1>&2 && git checkout -q --detach FETCH_HEAD 1>&2
   ) || exit 1
-  if [[ "$1 $2" != "ci init" ]]; then
-    exit 0
-  fi
+fi
+
+CI_PATH="${BUILD_DIR_PATH:-/build/${BUILD_DIR}}/ci"
+IMAGE_BASE=$(echo ${BUILD_IMAGE} | sed 's/^opencv-//g' | sed 's/:/--/g')
+if [[ -n "${IMAGE_BASE}" && -f "${CI_PATH}/cmake_checks/${BUILD_DIR}/${IMAGE_BASE}/CMAKE_INIT.cmake" ]]; then
+  export "OPENCV_CMAKE_HOOKS_DIR=${CI_PATH}/cmake_checks/${BUILD_DIR}/${IMAGE_BASE}"
+elif [[ -f "${CI_PATH}/cmake_checks/${BUILD_DIR}/CMAKE_INIT.cmake" ]]; then
+  export "OPENCV_CMAKE_HOOKS_DIR=${CI_PATH}/cmake_checks/${BUILD_DIR}"
 fi
 
 # limit resources for spawned processes
@@ -51,10 +56,6 @@ if [ -n "${BUILD_CLEANUP}" ]; then
   opencv_worker_container_cleanup
   exit $?
 fi
-
-export ANDROID_NDK=${ANDROID_NDK:-/opt/android/android-ndk-r10e/}
-export ANDROID_SDK=${ANDROID_SDK:-/opt/android/android-sdk-java7/}
-export NDKROOT=${ANDROID_NDK}
 
 if [[ "$1" == "ci" ]]; then
   shift
