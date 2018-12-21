@@ -1,1 +1,1 @@
-FROM opencv-ubuntu-openvino-2018r4:16.04
+FROM opencv-ubuntu-openvino-2018r5:16.04
