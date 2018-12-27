@@ -9,10 +9,14 @@ fi
 if [ -n "$HTTP_PROXY" ]; then
   DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --build-arg HTTP_PROXY=$HTTP_PROXY"
   DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --build-arg http_proxy=$HTTP_PROXY"
+  DOCKER_RUN_ARGS="$DOCKER_RUN_ARGS --env HTTP_PROXY=$HTTP_PROXY"
+  DOCKER_RUN_ARGS="$DOCKER_RUN_ARGS --env http_proxy=$HTTP_PROXY"
 fi
 if [ -n "$HTTPS_PROXY" ]; then
   DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --build-arg HTTPS_PROXY=$HTTPS_PROXY"
   DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --build-arg https_proxy=$HTTPS_PROXY"
+  DOCKER_RUN_ARGS="$DOCKER_RUN_ARGS --env HTTPS_PROXY=$HTTPS_PROXY"
+  DOCKER_RUN_ARGS="$DOCKER_RUN_ARGS --env https_proxy=$HTTPS_PROXY"
 fi
 
 if [ -n "$NOCACHE" ]; then
@@ -102,6 +106,7 @@ build_image()
           -v /opt/build-worker:/opt/build-worker:ro \
           -v /opt/build-containers-cache:/opt/build-containers-cache:rw \
           -v /opt/android:/opt/android:ro \
+          ${DOCKER_RUN_ARGS} \
           staging-$docker_image \
           ${WORKDIR}/entry.sh "${WORKDIR}" "$image"
       STATUS=`docker inspect ${CONTAINER_NAME} --format='{{.State.ExitCode}}'`
