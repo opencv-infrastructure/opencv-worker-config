@@ -1,4 +1,5 @@
 #!/bin/bash -e
+{ # force bash to read file completelly
 
 DIR=$1
 
@@ -19,7 +20,8 @@ nvm_cache_dir() {
   nvm_echo "/opt/build-containers-cache/nvm-cache"
 }
 
-NODEJS_VERSION=${NODEJS_VERSION:-"--lts"}
+# Details: https://github.com/nodejs/Release
+NODEJS_VERSION=${NODEJS_VERSION:-"--lts=carbon"}
 nvm install ${NODEJS_VERSION}
 nvm use ${NODEJS_VERSION}
 (
@@ -37,3 +39,6 @@ npm install -g node-qunit
 # update cache back
 rsync -avxHAX --checksum --exclude .nvm/versions --exclude .nvm/alias $HOME/.nvm /opt/build-containers-cache/nvm
 rsync -avxHAX --checksum --exclude .npm/_locks --exclude .npm/_logs $HOME/.npm /opt/build-containers-cache/javascript
+
+exit 0
+}

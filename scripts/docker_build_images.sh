@@ -103,7 +103,7 @@ build_image()
       docker rm ${CONTAINER_NAME} || /bin/true
       execute docker run -it --name ${CONTAINER_NAME} \
           -v ${ROOT_DIR}:/app:ro \
-          -v /opt/build-worker:/opt/build-worker:ro \
+          -v /opt/build-worker:/opt/build-worker:rw \
           -v /opt/build-containers-cache:/opt/build-containers-cache:rw \
           -v /opt/android:/opt/android:ro \
           ${DOCKER_RUN_ARGS} \

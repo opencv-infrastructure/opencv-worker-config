@@ -6,8 +6,10 @@ if [ -n "${BUILD_INITIALIZE}" ]; then
   exit 0
 fi
 
+. /tools/env.sh
+
 if [ "${BUILD_STAGE}" == "build" ]; then
-  . /opt/emsdk-portable/emsdk_env.sh
+  . ${EMSDK_DIR}/emsdk_env.sh
   set -x
   exec python ${BUILD_SRC_OPENCV}/platforms/js/build_js.py . --build_test
 fi

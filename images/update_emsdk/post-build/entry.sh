@@ -7,6 +7,8 @@
 DIR=${1?Missing workdir}
 IMAGE_NAME=${2?Missing image name}
 
+. /app/images/$IMAGE_NAME/tools/env.sh
+
 # Grab build user UID/GID
 if [ -f /app/deploy/env.sh ]; then
   . /app/deploy/env.sh
@@ -32,6 +34,12 @@ chown build:build /opt/build-containers-cache
 if [ -x ${DIR}/prepare_root.sh ]; then
   ${DIR}/prepare_root.sh || exit 1
 fi
+
+mkdir -p /opt/build-worker/emsdk-${EMSDK_VERSION}/
+chown build:build /opt/build-worker/emsdk-${EMSDK_VERSION}/
+
+mkdir -p /opt/build-containers-cache/emsdk-${EMSDK_VERSION}/
+chown build:build /opt/build-containers-cache/emsdk-${EMSDK_VERSION}/
 
 su - build -c "${DIR}/prepare.sh \"${DIR}\" ${IMAGE_NAME}" 2>&1 | tee /tmp/container.log
 
