@@ -1,4 +1,14 @@
 #!/bin/bash -e
+
+while /bin/true; do
+  FREESPACE=$(($(stat -f --format="%a*%S" .)))
+  if [[ $FREESPACE -gt 10737418240 ]]; then # 10G
+     break
+  fi
+  echo "ERROR: Not enough free space to launch build: ${FREESPACE} ..." >&2
+  sleep 300
+done
+
 if [[ -n "${BUILD_INIT_CI}" || "$1 $2" == "ci init" ]]; then
   [ -z "${BUILD_CI_URL}" ] && BUILD_CI_URL=$(cd src; git ls-remote --get-url origin | sed -r 's/(.git)?$/-ci\1/g')
   (
