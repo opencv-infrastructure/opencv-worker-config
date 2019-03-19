@@ -10,10 +10,6 @@ export ANDROID_HOME=${ANDROID_SDK}
 # Use CMake from Android SDK
 export "PATH=/opt/android/android-sdk.gradle/cmake/3.6.4111459/bin:$PATH"
 
-if [[ "$2" == *build_sdk.py* ]]; then
-  set -- python ../opencv/platforms/android/build_sdk.py --config ndk-17.config.py --build_doc . ../opencv
-fi
-
 if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
   ARGS=()
   # -DCMAKE_TOOLCHAIN_FILE=${NDKROOT}/build/cmake/android.toolchain.cmake \
