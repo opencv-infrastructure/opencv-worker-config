@@ -10,6 +10,8 @@ export ANDROID_HOME=${ANDROID_SDK}
 # Use CMake from Android SDK
 export "PATH=/opt/android/android-sdk.gradle/cmake/3.6.4111459/bin:$PATH"
 
+export GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2"
+
 if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
   ARGS=()
   # -DCMAKE_TOOLCHAIN_FILE=${NDKROOT}/build/cmake/android.toolchain.cmake \
