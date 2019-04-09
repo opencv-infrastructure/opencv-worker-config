@@ -18,7 +18,7 @@ cd buildbot/slave
 pip install -e .
 )
 
-. /opt/build/scripts/profile.sh
+. /opt/build/deploy/env.sh
 
 cp -rf /opt/build/config/info /build/
 [[ -d /build-2 ]] && cp -rf /opt/build/config/info /build-2/

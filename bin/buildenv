@@ -1,0 +1,123 @@
+#!/bin/bash -e
+export LC_ALL=C
+export LANG=en_US.UTF-8
+
+# Homebrew utils
+export PATH=/usr/local/bin:$PATH
+
+if [[ -n "${BUILD_INITIALIZE}" || -n "${BUILD_FINALIZE}" ]]; then
+  while true; do
+    FREESPACE=$(($(df -m . | awk 'NR==2{print $4}')))  # Mb
+    if [[ $FREESPACE -gt 10240 ]]; then # 10G
+       break
+    fi
+    echo "ERROR: Not enough free space to launch build: ${FREESPACE} Mb ..." >&2
+    sleep 300
+  done
+fi
+
+if [[ -n "${BUILD_INIT_CI}" || "$1 $2" == "ci init" ]]; then
+  [ -z "${BUILD_CI_URL}" ] && BUILD_CI_URL=$(cd src; git ls-remote --get-url origin | sed -r 's/(.git)?$/-ci\1/g')
+  (
+    mkdir -p ci; cd ci;
+    [ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1 || git clone --depth=10 ${BUILD_CI_URL} . 1>&2
+    git fetch ${BUILD_CI_URL} ${BUILD_CI_BRANCH:-HEAD} 1>&2 && git reset --hard 1>&2 && git clean -f -d -x 1>&2 && git checkout -q --detach FETCH_HEAD 1>&2
+  ) || exit 1
+fi
+
+CI_PATH="${BUILD_DIR_PATH:-/build/${BUILD_DIR}}/ci"
+IMAGE_BASE=$(echo ${BUILD_IMAGE} | sed 's/^opencv-//g' | sed 's/:/--/g')
+if [[ -n "${IMAGE_BASE}" && -f "${CI_PATH}/cmake_checks/${BUILD_DIR}/${IMAGE_BASE}/CMAKE_INIT.cmake" ]]; then
+  export "OPENCV_CMAKE_HOOKS_DIR=${CI_PATH}/cmake_checks/${BUILD_DIR}/${IMAGE_BASE}"
+elif [[ -f "${CI_PATH}/cmake_checks/${BUILD_DIR}/CMAKE_INIT.cmake" ]]; then
+  export "OPENCV_CMAKE_HOOKS_DIR=${CI_PATH}/cmake_checks/${BUILD_DIR}"
+fi
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+BASE_DIR="$(dirname "${SCRIPT_DIR}" )"
+
+get_image_script()
+{
+  local build_image=$1
+  local suffix=${2:-}
+  local image=$(echo $build_image | sed 's/^opencv-//g' | sed 's/:/--/g')
+  if [[ -n "$image" ]]; then
+    local script_name="${BASE_DIR}/images/${image}/tools/buildenv${suffix}"
+    if [ -f "${script_name}" ]; then
+      echo "${script_name}"
+    fi
+  fi
+  return 0
+}
+
+script_name="${BASE_DIR}/bin/buildenv-common"
+if [ -f "${script_name}" ]; then
+  . "${script_name}" "$@"
+fi
+
+if [ -n "${BUILD_IMAGE}" ]; then
+  if [ -n "${BUILD_INITIALIZE}" ]; then
+    image=$(echo "$BUILD_IMAGE" | sed 's/^opencv-//g' | sed 's/:/--/g')
+    if [ ! -d "${BASE_DIR}/images/${image}" ]; then
+      echo "FATAL: Image '$BUILD_IMAGE' is not supported by this build worker"
+      exit 1
+    fi
+  fi
+
+  script_name=$(get_image_script "$BUILD_IMAGE" -pre)
+  if [ -n "${script_name}" ]; then
+    . "${script_name}" "$@"
+  fi
+fi
+
+
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  set +e
+  rm opencv/.git/index.lock 2>/dev/null
+  rm opencv_extra/.git/index.lock 2>/dev/null
+  rm opencv_contrib/.git/index.lock 2>/dev/null
+  rm opencv_extra/.git/refs/heads/master.lock 2>/dev/null
+  exit 0
+fi
+if [ -n "${BUILD_FINALIZE}" ]; then
+  set +e
+  if [ -n "${BUILD_SRC_OPENCV}" ]; then (set -e; cd $BUILD_SRC_OPENCV; echo "OpenCV:"; git status) fi
+  if [ -n "${BUILD_SRC_OPENCV_CONTRIB}" ]; then (set -e; cd $BUILD_SRC_OPENCV_CONTRIB; echo "Contrib:"; git status) fi
+  if [ -n "${BUILD_SRC_OPENCV_EXTRA}" ]; then (set -e; cd $BUILD_SRC_OPENCV_EXTRA; echo "Extra:"; git status) fi
+  if [ ! -n "${BUILD_PRECOMMIT}" ]; then
+    echo "=== Clean 'build' directory ..."
+    (cd build;
+      make clean >/dev/null 2>&1 || true
+      ninja clean >/dev/null 2>&1 || true
+    )
+    if [ -d install ]; then
+      echo "=== Clean 'install' directory ..."
+      rm -rf ./install
+    fi
+  fi
+  exit $?
+fi
+if [ -n "${BUILD_CLEANUP}" ]; then
+  exit 0
+fi
+
+if [[ "$1" == "ci" ]]; then
+  shift
+  if [[ "${BUILD_CI_TARGET_OS}" == "mac" ]]; then
+    SCRIPT=./ci/mac/$1
+  else
+    SCRIPT=./ci/mac-${BUILD_CI_TARGET_OS}/$1
+  fi
+  shift
+  exec $SCRIPT "$@"
+fi
+
+if [ -n "${BUILD_IMAGE}" ]; then
+  script_name=$(get_image_script "$BUILD_IMAGE")
+  if [ -n "${script_name}" ]; then
+    . "${script_name}" "$@"
+    exit $?
+  fi
+fi
+
+exec "$@"

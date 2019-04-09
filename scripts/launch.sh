@@ -12,16 +12,14 @@ mkdir -p /build/logs
 }
 
 . /opt/pythonenv/bin/activate
-. scripts/profile.sh
+. deploy/env.sh
 
 if [ -n "$http_proxy" ]; then
   git config --global http.proxy $http_proxy
 fi
 
-mkdir -p /Users/build/bin
-[ ! -f /Users/build/bin/buildenv ] || rm -f /Users/build/bin/buildenv
-ln $(pwd)/scripts/buildenv /Users/build/bin/buildenv
-export PATH=/Users/build/bin:$PATH
+# buildenv script path
+export PATH=$(pwd)/bin:$PATH
 
 cd config
 buildslave --verbose start --nodaemon
