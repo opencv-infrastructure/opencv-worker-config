@@ -25,22 +25,35 @@ if [[ -n "${BUILD_INIT_CI}" || "$1 $2" == "ci init" ]]; then
   ) || exit 1
 fi
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+BASE_DIR="$(dirname "${SCRIPT_DIR}" )"
+
+BUILD_IMAGE_=$(echo ${BUILD_IMAGE} | sed 's/^opencv-//g' | sed 's/:/--/g')
+if [ -n "${BUILD_IMAGE}" ]; then
+  if [ -f "${BASE_DIR}/images/${BUILD_IMAGE_}/alias" ]; then
+    while read LINE; do
+      if [ -n "${LINE}" ]; then
+        BUILD_IMAGE_="$LINE"
+      fi
+    done <"${BASE_DIR}/images/${BUILD_IMAGE_}/alias"
+  fi
+  if [ ! -d "${BASE_DIR}/images/${BUILD_IMAGE_}" ]; then
+    echo "FATAL: Image '$BUILD_IMAGE' is not supported by this build worker"
+    exit 1
+  fi
+fi
+
 CI_PATH="${BUILD_DIR_PATH:-/build/${BUILD_DIR}}/ci"
-IMAGE_BASE=$(echo ${BUILD_IMAGE} | sed 's/^opencv-//g' | sed 's/:/--/g')
-if [[ -n "${IMAGE_BASE}" && -f "${CI_PATH}/cmake_checks/${BUILD_DIR}/${IMAGE_BASE}/CMAKE_INIT.cmake" ]]; then
-  export "OPENCV_CMAKE_HOOKS_DIR=${CI_PATH}/cmake_checks/${BUILD_DIR}/${IMAGE_BASE}"
+if [[ -n "${BUILD_IMAGE_}" && -f "${CI_PATH}/cmake_checks/${BUILD_DIR}/${BUILD_IMAGE_}/CMAKE_INIT.cmake" ]]; then
+  export "OPENCV_CMAKE_HOOKS_DIR=${CI_PATH}/cmake_checks/${BUILD_DIR}/${BUILD_IMAGE_}"
 elif [[ -f "${CI_PATH}/cmake_checks/${BUILD_DIR}/CMAKE_INIT.cmake" ]]; then
   export "OPENCV_CMAKE_HOOKS_DIR=${CI_PATH}/cmake_checks/${BUILD_DIR}"
 fi
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-BASE_DIR="$(dirname "${SCRIPT_DIR}" )"
-
 get_image_script()
 {
-  local build_image=$1
+  local image=$1
   local suffix=${2:-}
-  local image=$(echo $build_image | sed 's/^opencv-//g' | sed 's/:/--/g')
   if [[ -n "$image" ]]; then
     local script_name="${BASE_DIR}/images/${image}/tools/buildenv${suffix}"
     if [ -f "${script_name}" ]; then
@@ -56,15 +69,8 @@ if [ -f "${script_name}" ]; then
 fi
 
 if [ -n "${BUILD_IMAGE}" ]; then
-  if [ -n "${BUILD_INITIALIZE}" ]; then
-    image=$(echo "$BUILD_IMAGE" | sed 's/^opencv-//g' | sed 's/:/--/g')
-    if [ ! -d "${BASE_DIR}/images/${image}" ]; then
-      echo "FATAL: Image '$BUILD_IMAGE' is not supported by this build worker"
-      exit 1
-    fi
-  fi
 
-  script_name=$(get_image_script "$BUILD_IMAGE" -pre)
+  script_name=$(get_image_script "$BUILD_IMAGE_" -pre)
   if [ -n "${script_name}" ]; then
     . "${script_name}" "$@"
   fi
@@ -113,7 +119,7 @@ if [[ "$1" == "ci" ]]; then
 fi
 
 if [ -n "${BUILD_IMAGE}" ]; then
-  script_name=$(get_image_script "$BUILD_IMAGE")
+  script_name=$(get_image_script "$BUILD_IMAGE_")
   if [ -n "${script_name}" ]; then
     . "${script_name}" "$@"
     exit $?
