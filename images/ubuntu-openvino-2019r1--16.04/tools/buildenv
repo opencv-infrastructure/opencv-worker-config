@@ -15,7 +15,7 @@ set -- "${ARGS[@]}"  # restore original script arguments
 if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
   ARGS+=("-DENABLE_CXX11=ON")
   ARGS+=("-DWITH_INF_ENGINE=ON")
-  ARGS+=("-DINF_ENGINE_RELEASE=2019010000")
+  ARGS+=("-DINF_ENGINE_RELEASE=2019010100")
   set -- "${ARGS[@]}"
 fi
 

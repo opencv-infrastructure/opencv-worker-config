@@ -1,8 +1,1 @@
-FROM opencv-ubuntu:16.04
-
-RUN \
-  apt-get update && \
-  apt-get install -y --no-install-recommends \
-    cpio \
-    && \
-  rm -rf /var/lib/apt/lists/*
+FROM opencv-ubuntu-openvino-2019r1.1:16.04
