@@ -15,7 +15,7 @@ if [ -n "${CCACHE_VERSION}" ]; then
   export CCACHE_LOGFILE=$BASE_DIR/.container/ccache.log
   if [ ! -d "${CCACHE_DIR}" ]; then
     mkdir -p "${CCACHE_DIR}"
-    ccache -M 16G
+    ccache -M 8G
   fi
 fi
 
