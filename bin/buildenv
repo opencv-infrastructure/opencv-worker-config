@@ -37,9 +37,11 @@ if [ -n "${BUILD_IMAGE}" ]; then
       fi
     done <"${BASE_DIR}/images/${BUILD_IMAGE_}/alias"
   fi
-  if [ ! -d "${BASE_DIR}/images/${BUILD_IMAGE_}" ]; then
-    echo "FATAL: Image '$BUILD_IMAGE' is not supported by this build worker"
-    exit 1
+  if [ -n "${BUILD_INITIALIZE}" ]; then
+    if [ ! -d "${BASE_DIR}/images/${BUILD_IMAGE_}" ]; then
+      echo "FATAL: Image '$BUILD_IMAGE' is not supported by this build worker"
+      exit 1
+    fi
   fi
 fi
 
