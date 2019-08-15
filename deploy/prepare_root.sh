@@ -17,16 +17,16 @@ mkdir -p /env
 chown -R build:build /env
 
 mkdir -p /build
-chown -R build:build /build
-mkdir -p /build-2
-chown -R build:build /build-2
-mkdir -p /build-3
-chown -R build:build /build-3
+chown build:build /build /build/*
 
-#[ ! -d /opt/arm-linux-gnueabihf ] || cp -rf /opt/arm-linux-gnueabihf/* /usr/arm-linux-gnueabihf/
+set -x
 
-#[ ! -d /opt/packages/ceres/build ] ||
-#(
-#  cd /opt/packages/ceres/build
-#  make install || /bin/true
-#)
+if [ -n "${BUILDWORKER_USE_BUILD_2}" ]; then  # controlled via env.sh
+  mkdir -p /build-2
+  chown build:build /build-2 /build-2/*
+fi
+
+if [ -n "${BUILDWORKER_USE_BUILD_3}" ]; then  # controlled via env.sh
+  mkdir -p /build-3
+  chown build:build /build-3 /build-3/*
+fi

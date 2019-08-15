@@ -7,9 +7,14 @@ fi
 
 BUILD_DIR=${1?Missing build dir}
 
-pushd ${BUILD_DIR}
-
 DIR=${BUILD_DIR}/_repos
+if [ ! -d "$DIR" ]; then
+  DIR=$(pwd)
+fi
+
+echo "Builds base directory: ${BUILD_DIR}"
+echo "Repositories base directory: ${DIR}"
+
 (
   cd $DIR
   OPENCV_GIT_URL=${OPENCV_GIT_URL:-https://github.com/opencv}
@@ -17,6 +22,8 @@ DIR=${BUILD_DIR}/_repos
   git clone --bare ${OPENCV_GIT_URL}/opencv_extra.git || (cd opencv_extra.git; git fetch origin)
   git clone --bare ${OPENCV_GIT_URL}/opencv_contrib.git || (cd opencv_contrib.git; git fetch origin)
 )
+
+pushd ${BUILD_DIR}
 
 set +e
 

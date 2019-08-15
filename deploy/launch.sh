@@ -6,6 +6,7 @@
 . /env/bin/activate
 umask 0000
 
+mkdir -p /build/_repos
 cd /build/_repos
 /app/scripts/build_clone_repositories.sh /build
 [ -d /build-2 ] && /app/scripts/build_clone_repositories.sh /build-2

@@ -33,12 +33,15 @@ fi
 
 . /app/scripts/container_helpers.sh
 
+if [[ -f /app/bin/buildenv-pre ]]; then
+  . /app/bin/buildenv-pre
+fi
+
 if [ -n "${BUILD_INITIALIZE}" ]; then
+  if [[ -f /app/bin/buildenv-init-pre ]]; then
+    . /app/bin/buildenv-init-pre
+  fi
   set +e
-  rm opencv/.git/index.lock 2>/dev/null
-  rm opencv_extra/.git/index.lock 2>/dev/null
-  rm opencv_contrib/.git/index.lock 2>/dev/null
-  rm opencv_extra/.git/refs/heads/master.lock 2>/dev/null
   opencv_worker_container_create ${BUILD_IMAGE:-opencv-ubuntu:14.04}
   opencv_worker_container_exec echo "Initialize"
   unset BUILD_INITIALIZE
@@ -48,9 +51,15 @@ if [ -n "${BUILD_INITIALIZE}" ]; then
 #  opencv_worker_container_exec id
 #  opencv_worker_container_exec bash -c "export; id; whoami"
   #opencv_worker_container_exec sleep 30
+  if [[ -f /app/bin/buildenv-init-post ]]; then
+    . /app/bin/buildenv-init-post
+  fi
   exit $?
 fi
 if [ -n "${BUILD_FINALIZE}" ]; then
+  if [[ -f /app/bin/buildenv-finalize-pre ]]; then
+    . /app/bin/buildenv-finalize-pre
+  fi
   set +e
   if [ -n "${BUILD_SRC_OPENCV}" ]; then (set -e; cd $BUILD_SRC_OPENCV; echo "OpenCV:"; git status) fi
   if [ -n "${BUILD_SRC_OPENCV_CONTRIB}" ]; then (set -e; cd $BUILD_SRC_OPENCV_CONTRIB; echo "Contrib:"; git status) fi
@@ -67,10 +76,19 @@ if [ -n "${BUILD_FINALIZE}" ]; then
       rm -rf ./install
     fi
   fi
+  if [[ -f /app/bin/buildenv-finalize-post ]]; then
+    . /app/bin/buildenv-finalize-post
+  fi
   exit $?
 fi
 if [ -n "${BUILD_CLEANUP}" ]; then
+  if [[ -f /app/bin/buildenv-cleanup-pre ]]; then
+    . /app/bin/buildenv-cleanup-pre
+  fi
   opencv_worker_container_cleanup
+  if [[ -f /app/bin/buildenv-cleanup-post ]]; then
+    . /app/bin/buildenv-cleanup-post
+  fi
   exit $?
 fi
 
