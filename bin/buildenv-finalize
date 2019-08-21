@@ -1,0 +1,17 @@
+set +e
+if [ -n "${BUILD_SRC_OPENCV}" ]; then (set -e; cd $BUILD_SRC_OPENCV; echo "OpenCV:"; git status) fi
+if [ -n "${BUILD_SRC_OPENCV_CONTRIB}" ]; then (set -e; cd $BUILD_SRC_OPENCV_CONTRIB; echo "Contrib:"; git status) fi
+if [ -n "${BUILD_SRC_OPENCV_EXTRA}" ]; then (set -e; cd $BUILD_SRC_OPENCV_EXTRA; echo "Extra:"; git status) fi
+if [ ! -n "${BUILD_PRECOMMIT}" ]; then
+  echo "=== Clean 'build' directory ..."
+  (cd build;
+    make clean >/dev/null 2>&1 || true
+    ninja clean >/dev/null 2>&1 || true
+  )
+  if [ -d install ]; then
+    echo "=== Clean 'install' directory ..."
+    rm -rf ./install
+  fi
+fi
+echo "=== ccache stats ..."
+ccache -s || true

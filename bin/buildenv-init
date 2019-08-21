@@ -1,0 +1,15 @@
+# workaround: git process can be terminated without .lock files cleanup
+rm opencv/.git/index.lock 2>/dev/null || true
+rm opencv_extra/.git/index.lock 2>/dev/null || true
+rm opencv_contrib/.git/index.lock 2>/dev/null || true
+rm opencv_extra/.git/refs/heads/*.lock 2>/dev/null || true
+if [ -n "${BUILD_SRC_OPENCV}" ]; then
+  rm "${BUILD_SRC_OPENCV}/.git/index.lock" 2>/dev/null || true
+fi
+if [ -n "${BUILD_SRC_OPENCV_CONTRIB}" ]; then
+  rm "${BUILD_SRC_OPENCV_CONTRIB}/.git/index.lock" 2>/dev/null || true
+fi
+if [ -n "${BUILD_SRC_OPENCV_EXTRA}" ]; then
+  rm "${BUILD_SRC_OPENCV_EXTRA}/.git/index.lock" 2>/dev/null || true
+  rm "${BUILD_SRC_OPENCV_EXTRA}/.git/refs/heads/*.lock" 2>/dev/null || true
+fi

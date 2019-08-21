@@ -80,33 +80,17 @@ fi
 
 
 if [ -n "${BUILD_INITIALIZE}" ]; then
-  set +e
-  rm opencv/.git/index.lock 2>/dev/null
-  rm opencv_extra/.git/index.lock 2>/dev/null
-  rm opencv_contrib/.git/index.lock 2>/dev/null
-  rm opencv_extra/.git/refs/heads/master.lock 2>/dev/null
-  exit 0
+  if [[ -f "${SCRIPT_DIR}/buildenv-init" ]]; then
+    . "${SCRIPT_DIR}/buildenv-init"
+  fi
 fi
 if [ -n "${BUILD_FINALIZE}" ]; then
-  set +e
-  if [ -n "${BUILD_SRC_OPENCV}" ]; then (set -e; cd $BUILD_SRC_OPENCV; echo "OpenCV:"; git status) fi
-  if [ -n "${BUILD_SRC_OPENCV_CONTRIB}" ]; then (set -e; cd $BUILD_SRC_OPENCV_CONTRIB; echo "Contrib:"; git status) fi
-  if [ -n "${BUILD_SRC_OPENCV_EXTRA}" ]; then (set -e; cd $BUILD_SRC_OPENCV_EXTRA; echo "Extra:"; git status) fi
-  if [ ! -n "${BUILD_PRECOMMIT}" ]; then
-    echo "=== Clean 'build' directory ..."
-    (cd build;
-      make clean >/dev/null 2>&1 || true
-      ninja clean >/dev/null 2>&1 || true
-    )
-    if [ -d install ]; then
-      echo "=== Clean 'install' directory ..."
-      rm -rf ./install
-    fi
+  if [[ -f "${SCRIPT_DIR}/buildenv-finalize" ]]; then
+    . "${SCRIPT_DIR}/buildenv-finalize"
   fi
-  exit $?
 fi
 if [ -n "${BUILD_CLEANUP}" ]; then
-  exit 0
+  echo "=== Cleanup..."
 fi
 
 if [[ "$1" == "ci" ]]; then
