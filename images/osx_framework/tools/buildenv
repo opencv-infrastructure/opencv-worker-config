@@ -1,0 +1,17 @@
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo 'BUILD-PROP stages="build"' >&2
+  exit 0
+fi
+
+if [ "${BUILD_STAGE}" == "build" ]; then
+  set -x
+  if [ -n "${BUILD_SRC_OPENCV_CONTRIB}" ]; then
+    exec python ${BUILD_SRC_OPENCV}/platforms/osx/build_framework.py osx --contrib ${BUILD_SRC_OPENCV_CONTRIB}
+  else
+    exec python ${BUILD_SRC_OPENCV}/platforms/osx/build_framework.py osx
+  fi
+fi
+
+>&2 echo "FATAL: Invalid configuration detected:"
+export
+exit 1
