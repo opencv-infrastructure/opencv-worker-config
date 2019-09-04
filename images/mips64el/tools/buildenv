@@ -1,0 +1,19 @@
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo "BUILD-PROP run_abi_check=0" >&2
+  echo "BUILD-PROP run_tests=0" >&2
+  exit 0
+fi
+
+if [[ "$1" == *cmake* && "$2" != "--build" ]]; then
+  EXTRA_CMAKE_ARGS=( -DGNU_MACHINE=mips64el-linux-gnuabi64 -DGCC_COMPILER_VERSION=8 -DCMAKE_CXX_FLAGS=-mmsa -DCMAKE_C_FLAGS=-mmsa -DCMAKE_SYSTEM_PROCESSOR=mips64el )
+  if [[ "${BUILD_BRANCH}" == 3.4 ]]; then  # TODO use env variable
+    set -- "$@" "-DCMAKE_TOOLCHAIN_FILE=../3.4/opencv/platforms/linux/mips.toolchain.cmake" ${EXTRA_CMAKE_ARGS[@]}
+  else
+    set -- "$@" "-DCMAKE_TOOLCHAIN_FILE=../opencv/platforms/linux/mips.toolchain.cmake" ${EXTRA_CMAKE_ARGS[@]}
+  fi
+fi
+
+echo "===== Executing:" >&2
+echo "$@" >&2
+echo "=====" >&2
+exec "$@"
