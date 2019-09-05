@@ -5,7 +5,13 @@ if [ -n "${BUILD_INITIALIZE}" ]; then
 fi
 
 if [[ "$1" == *cmake* && "$2" != "--build" ]]; then
-  EXTRA_CMAKE_ARGS=( -DGNU_MACHINE=mips64el-linux-gnuabi64 -DGCC_COMPILER_VERSION=8 -DCMAKE_CXX_FLAGS=-mmsa -DCMAKE_C_FLAGS=-mmsa -DCMAKE_SYSTEM_PROCESSOR=mips64el )
+  EXTRA_CMAKE_ARGS=( \
+    -DCMAKE_SYSTEM_PROCESSOR=mips64el \
+    -DGNU_MACHINE=mips64el-linux-gnuabi64 \
+    -DGCC_COMPILER_VERSION=8 \
+    -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH \
+    -DCMAKE_CXX_FLAGS=-mmsa -DCMAKE_C_FLAGS=-mmsa \
+  )
   if [[ "${BUILD_BRANCH}" == 3.4 ]]; then  # TODO use env variable
     set -- "$@" "-DCMAKE_TOOLCHAIN_FILE=../3.4/opencv/platforms/linux/mips.toolchain.cmake" ${EXTRA_CMAKE_ARGS[@]}
   else
