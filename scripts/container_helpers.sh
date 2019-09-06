@@ -1,6 +1,7 @@
 mkdir -p /app/logs
 
 DOCKER=${DOCKER:-docker}
+DOCKER_IMAGE_PREFIX=${DOCKER_IMAGE_PREFIX:-opencv-}
 
 opencv_worker_container_cleanup()
 {
@@ -19,8 +20,8 @@ opencv_worker_container_cleanup()
 
 opencv_worker_container_create()
 {
-  local DOCKER_IMAGE=$1
-  BUILD_IMAGE=${DOCKER_IMAGE}
+  local BUILD_IMAGE=$1
+  local DOCKER_IMAGE=${DOCKER_IMAGE_PREFIX}$(echo ${BUILD_IMAGE} | sed 's/--/:/g')
   local WORK_DIR=$PWD
 
   date >> /app/logs/container.logs
@@ -34,11 +35,10 @@ opencv_worker_container_create()
   mkdir -p $WORK_DIR/.container
 
   if [[ "$($DOCKER images -q ${DOCKER_IMAGE} 2> /dev/null)" == "" ]]; then
-    echo "FATAL: Build image '$DOCKER_IMAGE' is missing on the current build worker" 1>&2
+    echo "FATAL: Build image for '${BUILD_IMAGE}' is missing on the current build worker" 1>&2
     return 1
   fi
 
-  local DOCKER_IMAGE_BASE=$(echo ${DOCKER_IMAGE} | sed 's/^opencv-//g' | sed 's/:/--/g')
   local NAME="opencv_build_$(basename $WORK_DIR)_$$"
 
   DOCKER_OPTS="$DOCKER_OPTS --name $NAME"
@@ -48,10 +48,12 @@ opencv_worker_container_create()
   . /app/scripts/container_options.sh
   DOCKER_OPTS="$DOCKER_OPTS -v $(host_mountpoint /app/deploy_worker):/app/deploy:ro"
   DOCKER_OPTS="$DOCKER_OPTS -v $(host_mountpoint /app/bin_worker):/app/bin:ro"
-  DOCKER_OPTS="$DOCKER_OPTS -v $(host_mountpoint /app/images/${DOCKER_IMAGE_BASE}/tools):/tools:ro"
+  if [[ -d /app/images/${BUILD_IMAGE}/tools ]]; then
+    DOCKER_OPTS="$DOCKER_OPTS -v $(host_mountpoint /app/images/${BUILD_IMAGE}/tools):/tools:ro"
+  fi
   DOCKER_OPTS="$DOCKER_OPTS -v $(host_mountpoint $WORK_DIR):$WORK_DIR:rw"
   DOCKER_OPTS="$DOCKER_OPTS --env BASE_DIR=$WORK_DIR"
-  DOCKER_OPTS="$DOCKER_OPTS --env BUILD_IMAGE=$DOCKER_IMAGE"
+  DOCKER_OPTS="$DOCKER_OPTS --env BUILD_IMAGE=$BUILD_IMAGE"
   DOCKER_OPTS="$DOCKER_OPTS --env APP_UID=$(id -u)"
   DOCKER_OPTS="$DOCKER_OPTS --env APP_GID=$(id -g)"
 

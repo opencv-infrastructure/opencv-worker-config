@@ -1,9 +1,18 @@
 #!/bin/bash -e
+{ # force bash to read file completelly
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+BASE_DIR="$(dirname "${SCRIPT_DIR}" )"
+
+if [[ -f "${SCRIPT_DIR}/buildenv-pre" ]]; then
+  . "${SCRIPT_DIR}/buildenv-pre"
+fi
+
+CI_CHECK_FREE_SPACE=${CI_REQUIRED_FREE_SPACE:-10737418240}  # 10G
 if [[ -n "${BUILD_INITIALIZE}" || -n "${BUILD_FINALIZE}" ]]; then
   while /bin/true; do
     FREESPACE=$(($(stat -f --format="%a*%S" .)))
-    if [[ $FREESPACE -gt 10737418240 ]]; then # 10G
+    if [[ $FREESPACE -gt ${CI_CHECK_FREE_SPACE} ]]; then
        break
     fi
     echo "ERROR: Not enough free space to launch build: ${FREESPACE} ..." >&2
@@ -20,12 +29,49 @@ if [[ -n "${BUILD_INIT_CI}" || "$1 $2" == "ci init" ]]; then
   ) || exit 1
 fi
 
-CI_PATH="${BUILD_DIR_PATH:-/build/${BUILD_DIR}}/ci"
-IMAGE_BASE=$(echo ${BUILD_IMAGE} | sed 's/^opencv-//g' | sed 's/:/--/g')
-if [[ -n "${IMAGE_BASE}" && -f "${CI_PATH}/cmake_checks/${BUILD_DIR}/${IMAGE_BASE}/CMAKE_INIT.cmake" ]]; then
-  export "OPENCV_CMAKE_HOOKS_DIR=${CI_PATH}/cmake_checks/${BUILD_DIR}/${IMAGE_BASE}"
-elif [[ -f "${CI_PATH}/cmake_checks/${BUILD_DIR}/CMAKE_INIT.cmake" ]]; then
-  export "OPENCV_CMAKE_HOOKS_DIR=${CI_PATH}/cmake_checks/${BUILD_DIR}"
+if [[ -n "${BUILD_IMAGE}" && -z "${BUILD_IMAGE_}" ]]; then
+  BUILD_IMAGE_=$(echo ${BUILD_IMAGE} | sed 's/^opencv-//g' | sed 's/:/--/g')
+  BUILD_IMAGE_ORIGIN="${BUILD_IMAGE_}"
+  BUILD_IMAGE_ORIGIN0=""
+  while [ "${BUILD_IMAGE_}" != "${BUILD_IMAGE_ORIGIN0}" ]; do
+    BUILD_IMAGE_ORIGIN0="${BUILD_IMAGE_}"
+    if [ -f "${BASE_DIR}/images/${BUILD_IMAGE_}/alias" ]; then
+      while read LINE; do
+        if [ -n "${LINE}" ]; then
+          BUILD_IMAGE_="$LINE"
+        fi
+      done <"${BASE_DIR}/images/${BUILD_IMAGE_}/alias"
+    fi
+  done
+  if [ -n "${BUILD_INITIALIZE}" ]; then
+    if [ "${BUILD_IMAGE_}" != "${BUILD_IMAGE_ORIGIN}" ]; then
+      echo "Actual image: ${BUILD_IMAGE_}"
+    fi
+    if [ ! -d "${BASE_DIR}/images/${BUILD_IMAGE_}" ]; then
+      echo "FATAL: Image '$BUILD_IMAGE_' is not supported by this build worker"
+      exit 1
+    fi
+  fi
+  unset BUILD_IMAGE_ORIGIN0
+fi
+
+if [[ -z "${OPENCV_CMAKE_HOOKS_DIR}" ]]; then
+  CI_PATH="${BUILD_DIR_PATH:-/build/${BUILD_DIR}}/ci"
+  if [[ -n "${BUILD_IMAGE_}" && -f "${CI_PATH}/cmake_checks/${BUILD_DIR}/${BUILD_IMAGE_}/CMAKE_INIT.cmake" ]]; then
+    export "OPENCV_CMAKE_HOOKS_DIR=${CI_PATH}/cmake_checks/${BUILD_DIR}/${BUILD_IMAGE_}"
+  elif [[ -n "${BUILD_IMAGE_ORIGIN}" && -f "${CI_PATH}/cmake_checks/${BUILD_DIR}/${BUILD_IMAGE_ORIGIN}/CMAKE_INIT.cmake" ]]; then
+    if [ -n "${BUILD_INITIALIZE}" ]; then
+        echo "WARNING: Using CMake checks from aliased image" >&2
+    fi
+    export "OPENCV_CMAKE_HOOKS_DIR=${CI_PATH}/cmake_checks/${BUILD_DIR}/${BUILD_IMAGE_ORIGIN}"
+  elif [[ -f "${CI_PATH}/cmake_checks/${BUILD_DIR}/CMAKE_INIT.cmake" ]]; then
+    export "OPENCV_CMAKE_HOOKS_DIR=${CI_PATH}/cmake_checks/${BUILD_DIR}"
+  fi
+  unset CI_PATH
+fi
+
+if [[ -n "${BUILD_IMAGE_}" ]]; then
+  BUILD_IMAGE=${BUILD_IMAGE_}
 fi
 
 # limit resources for spawned processes
@@ -33,16 +79,12 @@ fi
 
 . /app/scripts/container_helpers.sh
 
-if [[ -f /app/bin/buildenv-pre ]]; then
-  . /app/bin/buildenv-pre
-fi
-
 if [ -n "${BUILD_INITIALIZE}" ]; then
   if [[ -f /app/bin/buildenv-init-pre ]]; then
     . /app/bin/buildenv-init-pre
   fi
   set +e
-  opencv_worker_container_create ${BUILD_IMAGE:-opencv-ubuntu:14.04}
+  opencv_worker_container_create ${BUILD_IMAGE:-invalid_build_image}
   opencv_worker_container_exec echo "Initialize"
   unset BUILD_INITIALIZE
 #  opencv_worker_container_exec cmake "--version"
@@ -104,3 +146,6 @@ if [[ "$1" == "ci" ]]; then
 fi
 
 opencv_worker_container_exec "$@"
+
+exit 0
+}

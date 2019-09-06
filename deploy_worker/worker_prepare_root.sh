@@ -4,8 +4,7 @@ ldconfig
 
 get_image_script()
 {
-  local docker_image=$1
-  local image=$(echo $docker_image | sed 's/^opencv-//g' | sed 's/:/--/g')
+  local image=$1
   if [[ -n "$image" ]]; then
     local script_name="/app/deploy/images/prepare-$image"
     if [ -f "${script_name}" ]; then
@@ -31,11 +30,3 @@ if [ -f "${script_name}" ]; then
   . "${script_name}" "$@"
   exit $?
 fi
-
-#[ ! -d /opt/arm-linux-gnueabihf ] || cp -rf /opt/arm-linux-gnueabihf/* /usr/arm-linux-gnueabihf/
-
-#[ ! -d /opt/packages/ceres/build ] ||
-#(
-#  cd /opt/packages/ceres/build
-#  make install || /bin/true
-#)

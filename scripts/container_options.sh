@@ -1,7 +1,6 @@
 get_image_script()
 {
-  local docker_image=$1
-  local image=$(echo $docker_image | sed 's/^opencv-//g' | sed 's/:/--/g')
+  local image=$1
   if [[ -n "$image" ]]; then
     local script_name="/app/scripts/container_options-$image.sh"
     if [ -f "${script_name}" ]; then
