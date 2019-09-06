@@ -3,6 +3,8 @@ IMAGES_DIR=$1
 ROOT_DIR=`cd "$1"/.. && pwd`
 shift
 
+DOCKER_IMAGE_PREFIX=${DOCKER_IMAGE_PREFIX:-opencv-}
+
 if type "proxy_setup" 2>/dev/null; then
   proxy_setup
 fi
@@ -57,7 +59,7 @@ containsElement () {
 check_dependency()
 {
   local docker_image=$1
-  local image=$(echo $docker_image | sed 's/^opencv-//g' | sed 's/:/--/g')
+  local image=$(echo $docker_image | sed 's/^'${DOCKER_IMAGE_PREFIX}'//g' | sed 's/:/--/g')
   containsElement $docker_image "${FAILED_IMAGES[@]}" && return 1 || /bin/true
   containsElement $docker_image "${PROCESSED_IMAGES[@]}" ||
   {
@@ -69,9 +71,22 @@ check_dependency()
 build_image()
 {
   local image=$1
-  local docker_image=$(echo opencv-$image | sed 's/--/:/g')
-  local image=$(echo $docker_image | sed 's/^opencv-//g' | sed 's/:/--/g')
+  local docker_image=$(echo ${DOCKER_IMAGE_PREFIX}$image | sed 's/--/:/g')
+  local image=$(echo $docker_image | sed 's/^'${DOCKER_IMAGE_PREFIX}'//g' | sed 's/:/--/g')
   echo "Preparing image: $docker_image ($image)"
+  if [ -f $IMAGES_DIR/$image/alias ]; then
+    local aliased_image=$(head -n1 $IMAGES_DIR/$image/alias)
+    local docker_aliased_image=$(echo ${DOCKER_IMAGE_PREFIX}$aliased_image | sed 's/--/:/g')
+    echo "Aliased image: ${image} => ${aliased_image}"
+    build_image $aliased_image || {
+      echo "*  FATAL: Failed build of aliased image: ${image} => ${aliased_image}";
+      FAILED_IMAGES+=("$docker_image")
+      return 1
+    }
+    execute docker tag "${docker_aliased_image}" "${docker_image}"
+    echo "Done at $(date '+%Y-%m-%d %H:%M:%S'): Aliased image: ${image} => ${aliased_image}"
+    return 0
+  fi
   containsElement $docker_image "${PROCESSED_IMAGES[@]}" &&
   {
     echo "... already done."
@@ -80,7 +95,7 @@ build_image()
   PROCESSED_IMAGES+=("$docker_image")
 
   local deps=$(head -n1 $IMAGES_DIR/$image/docker/Dockerfile | sed -E 's/FROM +//g')
-  if [[ "${deps}" == opencv-* ]]; then
+  if [[ "${deps}" == ${DOCKER_IMAGE_PREFIX}* ]]; then
     echo "Deps: $deps"
     check_dependency $deps ||
     {
