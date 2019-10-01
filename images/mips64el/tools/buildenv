@@ -12,7 +12,10 @@ if [[ "$1" == *cmake* && "$2" != "--build" ]]; then
     -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH \
     -DCMAKE_CXX_FLAGS=-mmsa -DCMAKE_C_FLAGS=-mmsa \
   )
-  if [[ "${BUILD_BRANCH}" == 3.4 ]]; then  # TODO use env variable
+  # TODO use env variable
+  if [ -z "${BUILD_PRECOMMIT}" ]; then
+    set -- "$@" "-DCMAKE_TOOLCHAIN_FILE=../opencv/platforms/linux/mips.toolchain.cmake" ${EXTRA_CMAKE_ARGS[@]}
+  elif [[ "${BUILD_BRANCH}" == 3.4 ]]; then
     set -- "$@" "-DCMAKE_TOOLCHAIN_FILE=../3.4/opencv/platforms/linux/mips.toolchain.cmake" ${EXTRA_CMAKE_ARGS[@]}
   else
     set -- "$@" "-DCMAKE_TOOLCHAIN_FILE=../opencv/platforms/linux/mips.toolchain.cmake" ${EXTRA_CMAKE_ARGS[@]}
