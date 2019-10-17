@@ -1,0 +1,16 @@
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo "BUILD-PROP run_abi_check=0" >&2
+  exit 0
+fi
+
+if [[ "$1" == *cmake* && "$2" != "--build" && "$@" =~ BUILD_DOCS=ON ]]; then
+  ARGS=("$@")
+  ARGS+=("-DOPENCV_JAVADOC_LINK_URL=https://docs.oracle.com/en/java/javase/11/docs/api/")
+  set -- "${ARGS[@]}"
+fi
+
+echo "===== Executing:" >&2
+echo "$@" >&2
+echo "=====" >&2
+
+exec "$@"
