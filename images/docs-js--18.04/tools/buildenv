@@ -1,0 +1,13 @@
+. /tools/env.sh
+. ${EMSDK_DIR}/emsdk_env.sh
+if [[ -z "${EMSCRIPTEN}" && -n "${EMSCRIPTEN_ROOT}" ]]; then
+  export "EMSCRIPTEN=${EMSCRIPTEN_ROOT}"
+fi
+if [[ -z "${EMSCRIPTEN}" && -d "${EMSDK}/fastcomp/emscripten" ]]; then
+  export "EMSCRIPTEN=${EMSDK}/fastcomp/emscripten"
+fi
+if [[ -z "${EMSCRIPTEN}" && -d "${EMSDK}/upstream/emscripten" ]]; then
+  export "EMSCRIPTEN=${EMSDK}/upstream/emscripten"
+fi
+
+exec "$@"

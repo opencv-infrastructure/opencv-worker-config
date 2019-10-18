@@ -5,7 +5,7 @@
 
 if [ -n "${BUILD_INITIALIZE}" ]; then
   echo "EMSDK_VERSION=${EMSDK_VERSION}"
-  echo 'BUILD-PROP stages="build,test_js"' >&2
+  echo 'BUILD-PROP stages="build"' >&2  # TODO: test_js
   exit 0
 fi
 
@@ -21,7 +21,7 @@ if [ "${BUILD_STAGE}" == "build" ]; then
     export "EMSCRIPTEN=${EMSDK}/upstream/emscripten"
   fi
   set -x
-  exec python ${BUILD_SRC_OPENCV}/platforms/js/build_js.py . --build_test
+  exec python ${BUILD_SRC_OPENCV}/platforms/js/build_js.py . --build_test --build_wasm --simd --build_wasm_intrin_test
 fi
 
 if [ "${BUILD_STAGE}" == "test_js" ]; then
