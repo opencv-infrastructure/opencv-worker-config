@@ -1,0 +1,23 @@
+unset LD_LIBRARY_PATH  # avoid conflict with OpenCL LLVM
+source /home/build/plaidml-venv/bin/activate
+
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo "BUILD-PROP run_abi_check=0" >&2
+  [ -f /home/build/info.txt ] && cat /home/build/info.txt
+  cat /home/build/.plaidml2
+  exit 0
+fi
+
+set -o allexport; source /home/build/.plaidml2; set +o allexport
+
+ARGS=("$@")
+
+if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
+  ARGS+=("-DWITH_PLAIDML=ON")
+  ARGS+=("-DPlaidML_DIR=/home/build/plaidml-venv/share/plaidml2/")
+  ARGS+=("-DPlaidML2_DIR=/home/build/plaidml-venv/share/plaidml2/")
+  set -- "${ARGS[@]}"
+fi
+
+echo "$@"
+exec "$@"
