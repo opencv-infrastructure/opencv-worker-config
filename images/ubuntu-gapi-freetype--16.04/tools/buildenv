@@ -1,0 +1,14 @@
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo "BUILD-PROP run_abi_check=0" >&2
+  exit 0
+fi
+
+ARGS=("$@")
+
+if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
+  ARGS+=("-DWITH_FREETYPE=ON")
+  set -- "${ARGS[@]}"
+fi
+
+echo "Execute: $@"
+exec "$@"
