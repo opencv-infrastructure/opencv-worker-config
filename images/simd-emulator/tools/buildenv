@@ -1,0 +1,9 @@
+ARGS=("$@")
+
+if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
+  ARGS+=("-DOPENCV_EXTRA_FLAGS=\"-DCV_FORCE_SIMD128_CPP=1\"")
+  set -- "${ARGS[@]}"
+  echo "$@"
+fi
+
+exec "$@"
