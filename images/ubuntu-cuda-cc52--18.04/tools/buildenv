@@ -1,0 +1,33 @@
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo "BUILD-PROP run_abi_check=0" >&2
+  if [ ! -f /dev/nvidiactl ]; then
+    echo "BUILD-PROP run_tests=0" >&2
+  fi
+  exit 0
+fi
+
+if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
+  ARGS=()
+  for arg in "$@"; do
+    if [[ "$arg" == "-DWITH_CUDA=OFF" ]]; then
+      echo "Removing -DWITH_CUDA=OFF option"
+    else
+      ARGS+=("$arg")
+    fi
+  done
+  ARGS+=("-DWITH_CUDA=ON")
+  ARGS+=("-DCUDA_ARCH_BIN=5.2")
+  ARGS+=("-DWITH_CUBLAS=ON")
+  ARGS+=("-DWITH_CUFFT=ON")
+  ARGS+=("-DWITH_NVCUVID=ON")
+  set -- "${ARGS[@]}"
+fi
+
+# We don't have CUDA drivers
+export CUDA_LIB_PATH=/usr/local/cuda/lib64/stubs/
+
+export PATH=/usr/local/nvidia/bin:/usr/local/cuda/bin:${PATH}
+export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:${LD_LIBRARY_PATH}
+export LIBRARY_PATH=/usr/local/cuda/lib64/stubs:${LIBRARY_PATH}
+
+exec "$@"
