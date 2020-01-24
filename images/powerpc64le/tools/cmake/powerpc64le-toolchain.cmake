@@ -1,8 +1,8 @@
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR powerpc64le)
 
-set(CMAKE_C_COMPILER /usr/bin/powerpc64le-linux-gnu-gcc-7)
-set(CMAKE_CXX_COMPILER /usr/bin/powerpc64le-linux-gnu-g++-7)
+set(CMAKE_C_COMPILER /usr/bin/powerpc64le-linux-gnu-gcc-8)
+set(CMAKE_CXX_COMPILER /usr/bin/powerpc64le-linux-gnu-g++-8)
 
 set(CMAKE_FIND_ROOT_PATH /usr/powerpc64le-linux-gnu)
 
