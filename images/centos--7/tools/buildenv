@@ -1,0 +1,19 @@
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  exit 0
+fi
+
+ARGS_ORIG=("$@")
+
+if [[ "${BUILD_BRANCH}" == "master" ]]; then
+  ARGS=("$@")
+  if [[ "${ARGS[0]}" == "cmake" ]]; then
+    ARGS[0]="cmake3"
+  fi
+  set -- "${ARGS[@]}"
+fi
+
+if [[ "${ARGS_ORIG[@]}" != "$@" ]]; then
+  echo "$@" >&2
+fi
+
+exec "$@"
