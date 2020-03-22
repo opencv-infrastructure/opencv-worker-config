@@ -3,10 +3,10 @@ FROM opencv-base:16.04
 RUN \
   apt-get update && \
   apt-get install -y --no-install-recommends \
-    cmake build-essential ccache \
+    cmake build-essential ccache ninja-build \
     python-dev python-numpy \
     python3-dev python3-numpy \
-    zlib1g-dev libjpeg-dev libpng12-dev libtiff5-dev libjasper-dev \
+    zlib1g-dev libjpeg-dev libpng12-dev libtiff5-dev libjasper-dev libopenjp2-7-dev \
     libgtk2.0-dev \
     libavcodec-dev libavformat-dev libswscale-dev \
     libtbb-dev libtbb2 \
@@ -19,13 +19,6 @@ RUN \
     libgoogle-glog-dev \
     libatlas-base-dev libeigen3-dev libsuitesparse-dev liblapacke-dev \
     xvfb \
-    && \
-  rm -rf /var/lib/apt/lists/*
-
-RUN \
-  apt-get update && \
-  apt-get install -y --no-install-recommends \
-    ninja-build \
     && \
   rm -rf /var/lib/apt/lists/*
 

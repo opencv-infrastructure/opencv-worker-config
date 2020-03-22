@@ -3,10 +3,10 @@ FROM opencv-base:18.04
 RUN \
   apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    cmake build-essential ccache \
+    cmake build-essential ccache ninja-build \
     python-dev python-numpy \
     python3-dev python3-numpy \
-    zlib1g-dev libjpeg-dev libpng-dev libtiff5-dev \
+    zlib1g-dev libjpeg-dev libpng-dev libtiff5-dev libopenjp2-7-dev \
     libgtk2.0-dev \
     libavcodec-dev libavformat-dev libswscale-dev \
     libtbb-dev libtbb2 \
@@ -30,12 +30,5 @@ RUN \
     libopenni2-dev \
     libdc1394-22-dev \
     libgphoto2-dev \
-    && \
-  rm -rf /var/lib/apt/lists/*
-
-RUN \
-  apt-get update && \
-  apt-get install -y --no-install-recommends \
-    ninja-build \
     && \
   rm -rf /var/lib/apt/lists/*
