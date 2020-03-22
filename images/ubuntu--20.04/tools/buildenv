@@ -1,0 +1,19 @@
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo "BUILD-PROP run_abi_check=0" >&2
+  exit 0
+fi
+
+if [[ "$1" != *cmake* ]]; then
+  ARGS=()
+  for arg in "$@"; do
+    if [[ "$arg" == "python" ]]; then
+      ARGS+=("python3")
+    else
+      ARGS+=("$arg")
+    fi
+  done
+  set -- "${ARGS[@]}"
+  echo "$@"
+fi
+
+exec "$@"
