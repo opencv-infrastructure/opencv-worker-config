@@ -10,7 +10,7 @@ export
 virtualenv /opt/pythonenv
 . /opt/pythonenv/bin/activate
 
-pip install --upgrade pip
+pip install --upgrade pip wheel 'setuptools<45' six
 
 cd /opt/build
 (
