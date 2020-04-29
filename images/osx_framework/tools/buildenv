@@ -3,6 +3,17 @@ if [ -n "${BUILD_INITIALIZE}" ]; then
   exit 0
 fi
 
+if [ -n "${BUILD_CLEANUP}" ]; then
+  echo "Cleanup"
+  exit 0
+fi
+
+if [ -n "${BUILD_FINALIZE}" ]; then
+  echo "Finalize"
+  exit 0
+fi
+
+
 if [ "${BUILD_STAGE}" == "build" ]; then
   set -x
   if [ -n "${BUILD_SRC_OPENCV_CONTRIB}" ]; then
