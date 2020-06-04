@@ -8,14 +8,26 @@ if [[ -f "${SCRIPT_DIR}/buildenv-pre" ]]; then
   . "${SCRIPT_DIR}/buildenv-pre"
 fi
 
-CI_CHECK_FREE_SPACE=${CI_REQUIRED_FREE_SPACE:-10737418240}  # 10G
 if [[ -n "${BUILD_INITIALIZE}" || -n "${BUILD_FINALIZE}" ]]; then
+  CI_CHECK_FREE_SPACE=${CI_REQUIRED_FREE_SPACE:-10737418240}  # 10G
+  CI_CHECK_FREE_SPACE_DOCKER=${CI_REQUIRED_FREE_SPACE_DOCKER:-2147483648}  # 2G
+  DEFAULT_CI_DOCKER_PATH=/var/lib/docker
+  if [[ ! -d /var/lib/docker ]]; then  # check if we run in container
+    DEFAULT_CI_DOCKER_PATH=/
+  fi
+  CI_DOCKER_PATH=${CI_DOCKER_PATH:-${DEFAULT_CI_DOCKER_PATH}}
   while /bin/true; do
     FREESPACE=$(($(stat -f --format="%a*%S" .)))
+    FREESPACE_DOCKER=$(($(stat -f --format="%a*%S" ${CI_DOCKER_PATH})))
     if [[ $FREESPACE -gt ${CI_CHECK_FREE_SPACE} ]]; then
-       break
+      if [[ $FREESPACE_DOCKER -gt ${CI_CHECK_FREE_SPACE_DOCKER} ]]; then
+        break
+      else
+        echo "ERROR: Not enough free space on Docker storage to launch build: ${FREESPACE_DOCKER} ..." >&2
+      fi
+    else
+      echo "ERROR: Not enough free space to launch build: ${FREESPACE} ..." >&2
     fi
-    echo "ERROR: Not enough free space to launch build: ${FREESPACE} ..." >&2
     sleep 300
   done
 fi
