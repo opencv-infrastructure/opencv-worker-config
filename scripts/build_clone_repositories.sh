@@ -31,7 +31,7 @@ for d in *; do
   if [[ -d "$d" && $d != "_repos" && $d != "logs" && $d != "info" ]]; then
     echo "======================================= $d "
     cd $d
-    if [[ $d == precommit* || $d == master* || $d == 2_4* || $d == *3_4* ]]; then
+    if [[ $d == precommit* || $d == master* || $d == 2_4* || $d == *3_4* || $d == 4_x* || $d == 5_x* || $d == next ]]; then
       (
       git clone -s -n ${DIR}/opencv.git
       git clone -s -n ${DIR}/opencv_extra.git
@@ -49,6 +49,27 @@ for d in *; do
       (
       echo "    +3.4"
       mkdir -p 3.4; cd 3.4;
+      git clone -s -n ${DIR}/opencv.git
+      git clone -s -n ${DIR}/opencv_extra.git
+      git clone -s -n ${DIR}/opencv_contrib.git
+      )
+      (
+      echo "    +next"
+      mkdir -p next; cd next;
+      git clone -s -n ${DIR}/opencv.git
+      git clone -s -n ${DIR}/opencv_extra.git
+      git clone -s -n ${DIR}/opencv_contrib.git
+      )
+      (
+      echo "    +4.x"
+      mkdir -p 4.x; cd 4.x;
+      git clone -s -n ${DIR}/opencv.git
+      git clone -s -n ${DIR}/opencv_extra.git
+      git clone -s -n ${DIR}/opencv_contrib.git
+      )
+      (
+      echo "    +5.x"
+      mkdir -p 5.x; cd 5.x;
       git clone -s -n ${DIR}/opencv.git
       git clone -s -n ${DIR}/opencv_extra.git
       git clone -s -n ${DIR}/opencv_contrib.git
