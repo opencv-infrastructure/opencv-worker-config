@@ -1,0 +1,2 @@
+#!/bin/sh
+exec perl /opt/abi-compliance-checker-2.3/abi-compliance-checker.pl "$@"

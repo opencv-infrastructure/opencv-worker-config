@@ -1,0 +1,7 @@
+if [[ -n "${BUILD_INITIALIZE}" && "$BUILD_BRANCH" == "next" ]]; then
+  # see also: https://github.com/lvc/abi-compliance-checker/issues/107
+  echo "BUILD-PROP run_abi_check=0" >&2
+  exit 0
+fi
+
+exec "$@"
