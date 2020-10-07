@@ -1,0 +1,36 @@
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo "BUILD-PROP run_abi_check=0" >&2
+  exit 0
+fi
+
+ARGS=("$@")  # save original script arguments
+set --  # no args for OpenVINO script
+# save and restore PYTHONPATH (we don't want to test OpenVINO OpenCV bindings here)
+PYTHONPATH_SAVED=${PYTHONPATH}
+. /opt/intel/openvino_2021/bin/setupvars.sh
+export PYTHONPATH=${PYTHONPATH_SAVED}
+
+set -- "${ARGS[@]}"  # restore original script arguments
+
+if [[ "$1" != *cmake* ]]; then
+  ARGS=()
+  for arg in "$@"; do
+    if [[ "$arg" == "python" ]]; then
+      ARGS+=("python3")
+    else
+      ARGS+=("$arg")
+    fi
+  done
+  set -- "${ARGS[@]}"
+fi
+
+if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
+  ARGS=("$@")
+  ARGS+=("-DENABLE_CXX11=ON")
+  ARGS+=("-DWITH_INF_ENGINE=ON")
+  ARGS+=("-DINF_ENGINE_RELEASE=2021010000")
+  set -- "${ARGS[@]}"
+fi
+
+echo "$@"
+exec "$@"
