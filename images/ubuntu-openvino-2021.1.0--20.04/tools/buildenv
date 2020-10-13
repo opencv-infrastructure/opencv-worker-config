@@ -12,6 +12,9 @@ export PYTHONPATH=${PYTHONPATH_SAVED}
 
 set -- "${ARGS[@]}"  # restore original script arguments
 
+# exclude opencv/lib (avoid mess with opencv libraries from OpenVINO)
+export LD_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed -E 's/:[^:]+opencv\/lib//g')
+
 if [[ "$1" != *cmake* ]]; then
   ARGS=()
   for arg in "$@"; do
