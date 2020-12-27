@@ -1,0 +1,29 @@
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo "BUILD-PROP run_abi_check=0" >&2
+  exit 0
+fi
+
+export OPENCV_GAPI_ONNX_MODEL_PATH=/opt/build-testdata/onnx_models
+
+ARGS=("$@")
+
+if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
+  ARGS+=("-DWITH_ONNX=ON")
+  ARGS+=("-DONNXRT_ROOT_DIR=/opt/onnxrt")
+  set -- "${ARGS[@]}"
+fi
+
+if [[ "$1" != *cmake* ]]; then
+  ARGS=()
+  for arg in "$@"; do
+    if [[ "$arg" == "python" ]]; then
+      ARGS+=("python3")
+    else
+      ARGS+=("$arg")
+    fi
+  done
+  set -- "${ARGS[@]}"
+fi
+
+echo "Execute: $@"
+exec "$@"
