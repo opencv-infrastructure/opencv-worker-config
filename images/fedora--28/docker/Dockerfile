@@ -1,4 +1,5 @@
-FROM opencv-base:fedora28
+ARG DOCKER_IMAGE_PREFIX
+FROM ${DOCKER_IMAGE_PREFIX}base:fedora28
 
 RUN \
   dnf install -y \

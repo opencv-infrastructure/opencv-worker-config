@@ -1,4 +1,5 @@
-FROM opencv-base:fedora31
+ARG DOCKER_IMAGE_PREFIX
+FROM ${DOCKER_IMAGE_PREFIX}base:fedora31
 
 RUN \
   dnf install -y \

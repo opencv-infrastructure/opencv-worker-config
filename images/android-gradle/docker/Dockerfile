@@ -1,1 +1,2 @@
-FROM opencv-android
+ARG DOCKER_IMAGE_PREFIX
+FROM ${DOCKER_IMAGE_PREFIX}android

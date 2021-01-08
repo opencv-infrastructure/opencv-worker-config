@@ -1,4 +1,5 @@
-FROM opencv-base:centos7
+ARG DOCKER_IMAGE_PREFIX
+FROM ${DOCKER_IMAGE_PREFIX}base:centos7
 
 RUN \
   yum update -y && \

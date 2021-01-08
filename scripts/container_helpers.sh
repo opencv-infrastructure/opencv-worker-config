@@ -1,5 +1,19 @@
 mkdir -p /app/logs
 
+if [ ! -n "${CONFIGURATION_SCRIPT:-}" ]; then
+  load_configuration()
+  {
+    local SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+    local CFG_FILES="${SCRIPT_DIR}/config.d/*.sh"
+    for script in ${CFG_FILES}; do
+      . "${script}"
+    done
+  }
+  load_configuration
+else
+  . "${CONFIGURATION_SCRIPT}"
+fi
+
 DOCKER=${DOCKER:-docker}
 DOCKER_IMAGE_PREFIX=${DOCKER_IMAGE_PREFIX:-opencv-}
 
@@ -33,6 +47,12 @@ opencv_worker_container_create()
   set -e
 
   mkdir -p $WORK_DIR/.container
+
+  # Keep images up-to-date
+  if [ ! -n "${DOCKER_SKIP_PULL:-}" ]; then
+    # TODO: $DOCKER pull --quiet "${DOCKER_IMAGE}" || true
+    $DOCKER pull "${DOCKER_IMAGE}" || true
+  fi
 
   if [[ "$($DOCKER images -q ${DOCKER_IMAGE} 2> /dev/null)" == "" ]]; then
     echo "FATAL: Build image for '${BUILD_IMAGE}' is missing on the current build worker" 1>&2

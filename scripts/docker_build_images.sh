@@ -4,6 +4,17 @@ set -e
 set -o pipefail
 set -u
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+if [ ! -n "${CONFIGURATION_SCRIPT:-}" ]; then
+  CFG_FILES="${SCRIPT_DIR}/config.d/*.sh"
+  for script in ${CFG_FILES}; do
+    . "${script}"
+  done
+else
+  . "${CONFIGURATION_SCRIPT}"
+fi
+
 # bash 4.4+ is OK: https://stackoverflow.com/questions/7577052/bash-empty-array-expansion-with-set-u
 if ! echo $BASH_VERSION | awk -F. '{ if ($1 > 4 || ($1 == 4 && $2 >= 4)) { exit 0 } else {exit 1} }' ; then
   set +u
@@ -36,19 +47,22 @@ DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --build-arg NO_PROXY=$NO_PROXY --build-arg
 if [ -n "${NOCACHE:-}" ]; then
   DOCKER_BUILD_ARGS="--no-cache $DOCKER_BUILD_ARGS"
 fi
-# Doesn't work, because intermediate images are not pushed into registry
-#if [ -z "$FAST" ]; then
+# Doesn't work, because intermediate images are not pushed into registry (until PUSH_IMAGE is used, but this doesn't make sence)
+# Pull base images, like ubuntu:20.4 manually
+#if [[ -z "${FAST:-}" ]]; then
 #  DOCKER_BUILD_ARGS="--pull $DOCKER_BUILD_ARGS"
 #fi
+
+DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --build-arg DOCKER_IMAGE_PREFIX=$DOCKER_IMAGE_PREFIX"
 
 PROCESSED_IMAGES=()
 FAILED_IMAGES=()
 
 
-YELLOW=`tput setaf 11`
-BOLD=`tput bold`
-ERROR_STYLE=`tput setaf 15``tput setab 1`$BOLD
-RESET=`tput sgr0`
+YELLOW=`tput setaf 11 2>/dev/null || echo ""`
+BOLD=`tput bold 2>/dev/null || echo ""`
+ERROR_STYLE=`tput setaf 15 2>/dev/null || echo ""``tput setab 1 2>/dev/null || echo ""`$BOLD
+RESET=`tput sgr0 2>/dev/null || echo ""`
 
 exec 9>&1
 execute()
@@ -71,7 +85,7 @@ containsElement () {
 check_dependency()
 {
   local docker_image=$1
-  local image=$(echo $docker_image | sed 's/^'${DOCKER_IMAGE_PREFIX}'//g' | sed 's/:/--/g')
+  local image=$(echo "${docker_image/#${DOCKER_IMAGE_PREFIX}/}" | sed 's/:/--/g' || true)
   containsElement $docker_image "${FAILED_IMAGES[@]}" && return 1 || /bin/true
   containsElement $docker_image "${PROCESSED_IMAGES[@]}" ||
   {
@@ -83,12 +97,17 @@ check_dependency()
 build_image()
 {
   local image=$1
-  local docker_image=$(echo ${DOCKER_IMAGE_PREFIX}$image | sed 's/--/:/g')
-  local image=$(echo $docker_image | sed 's/^'${DOCKER_IMAGE_PREFIX}'//g' | sed 's/:/--/g')
+  local docker_image=${DOCKER_IMAGE_PREFIX}$(echo $image | sed 's/--/:/g')
+  local image=$(echo "${docker_image/#${DOCKER_IMAGE_PREFIX}/}" | sed 's/:/--/g' || true)
   echo "Preparing image: $docker_image ($image)"
+  if [ ! -d "$IMAGES_DIR/$image" ]; then
+    echo $ERROR_STYLE"... NOT FOUND"$RESET
+    FAILED_IMAGES+=("$docker_image")
+    return 1
+  fi
   if [ -f $IMAGES_DIR/$image/alias ]; then
     local aliased_image=$(head -n1 $IMAGES_DIR/$image/alias)
-    local docker_aliased_image=$(echo ${DOCKER_IMAGE_PREFIX}$aliased_image | sed 's/--/:/g')
+    local docker_aliased_image=${DOCKER_IMAGE_PREFIX}$(echo $aliased_image | sed 's/--/:/g')
     echo "Aliased image: ${image} => ${aliased_image}"
     build_image $aliased_image || {
       echo "*  FATAL: Failed build of aliased image: ${image} => ${aliased_image}";
@@ -97,6 +116,7 @@ build_image()
     }
     execute docker tag "${docker_aliased_image}" "${docker_image}"
     echo "Done at $(date '+%Y-%m-%d %H:%M:%S'): Aliased image: ${image} => ${aliased_image}"
+    push_image_to_registry "${image}"
     return 0
   fi
   containsElement $docker_image "${PROCESSED_IMAGES[@]}" &&
@@ -106,8 +126,32 @@ build_image()
   }
   PROCESSED_IMAGES+=("$docker_image")
 
-  local deps=$(head -n1 $IMAGES_DIR/$image/docker/Dockerfile | sed -E 's/FROM +//g')
-  if [[ "${deps}" == ${DOCKER_IMAGE_PREFIX}* ]]; then
+  if [ ! -r $IMAGES_DIR/$image/docker/Dockerfile ]; then
+    echo $ERROR_STYLE"... mising Dockerfile"$RESET
+    FAILED_IMAGES+=("$docker_image")
+    return 1
+  fi
+
+  if [[ -n "${PULLONLY:-}" ]]; then
+    execute docker pull $docker_image || {
+      echo "*  FATAL: Failed to pull image: ${image} => ${aliased_image} ( $docker_image )";
+      FAILED_IMAGES+=("$docker_image")
+      return 1
+    }
+    return 0
+  fi
+
+  local deps=$(grep -E '^FROM' $IMAGES_DIR/$image/docker/Dockerfile | head -n1 | sed -E 's/FROM +//g')
+  if [[ "${deps}" == opencv-* ]]; then  # legacy
+    deps=${DOCKER_IMAGE_PREFIX}${deps/#opencv-/}
+    echo "Deps: $deps"
+    check_dependency $deps ||
+    {
+      FAILED_IMAGES+=("$docker_image")
+      return 1
+    }
+  elif [[ "${deps}" == \$\{DOCKER_IMAGE_PREFIX\}* ]]; then
+    deps=${DOCKER_IMAGE_PREFIX}${deps/#\$\{DOCKER_IMAGE_PREFIX\}/}
     echo "Deps: $deps"
     check_dependency $deps ||
     {
@@ -206,6 +250,26 @@ ${IMAGE_STAGING}
     FAILED_IMAGES+=("$docker_image")
     return 1
   }
+  push_image_to_registry "${image}"
+}
+
+push_image_to_registry()
+{
+  local image=$1
+  local docker_image=${DOCKER_IMAGE_PREFIX}$(echo $image | sed 's/--/:/g')
+  if [ -n "${PUSH_IMAGE:-}" ]; then
+    local docker_push_image=${DOCKER_PUSH_IMAGE_PREFIX:-DOCKER_IMAGE_PREFIX}$(echo $image | sed 's/--/:/g')
+    execute docker tag "${docker_image}" "${docker_push_image}"
+    execute docker push "${docker_push_image}" ||
+    {
+      echo "==============================================================================="
+      echo "*  FATAL: Can't push docker image: $docker_push_image ($image)"
+      echo "*       : Ensure to call 'docker login'"
+      echo "==============================================================================="
+      exit 1
+    }
+    execute docker rmi "${docker_push_image}"
+  fi
 }
 
 if [ "$#" -ge 1 ]; then

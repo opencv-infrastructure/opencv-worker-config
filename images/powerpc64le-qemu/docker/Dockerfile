@@ -1,4 +1,5 @@
-FROM opencv-powerpc64le
+ARG DOCKER_IMAGE_PREFIX
+FROM ${DOCKER_IMAGE_PREFIX}powerpc64le
 
 RUN \
   apt-get update && \

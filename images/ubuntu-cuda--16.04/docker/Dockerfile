@@ -1,4 +1,5 @@
-FROM opencv-ubuntu:16.04
+ARG DOCKER_IMAGE_PREFIX
+FROM ${DOCKER_IMAGE_PREFIX}ubuntu:16.04
 
 # Based on code from https://github.com/NVIDIA/nvidia-docker distributed undeb BSD-like license
 #MAINTAINER NVIDIA CORPORATION <digits@nvidia.com>

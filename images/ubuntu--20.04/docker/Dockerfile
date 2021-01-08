@@ -1,4 +1,5 @@
-FROM opencv-base:20.04
+ARG DOCKER_IMAGE_PREFIX
+FROM ${DOCKER_IMAGE_PREFIX}base:20.04
 
 RUN \
   apt-get update && \

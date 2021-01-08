@@ -1,4 +1,5 @@
-FROM opencv-base32:16.04
+ARG DOCKER_IMAGE_PREFIX
+FROM ${DOCKER_IMAGE_PREFIX}base32:16.04
 
 RUN \
   apt-get update && \

@@ -1,4 +1,5 @@
-FROM opencv-ubuntu:18.04
+ARG DOCKER_IMAGE_PREFIX
+FROM ${DOCKER_IMAGE_PREFIX}ubuntu:18.04
 
 RUN \
   apt-get update && \

@@ -1,4 +1,5 @@
-FROM opencv-base:12.04
+ARG DOCKER_IMAGE_PREFIX
+FROM ${DOCKER_IMAGE_PREFIX}base:12.04
 
 RUN \
   apt-get update && \

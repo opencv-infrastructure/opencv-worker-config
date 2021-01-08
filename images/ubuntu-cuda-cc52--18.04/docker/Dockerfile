@@ -1,1 +1,2 @@
-FROM opencv-ubuntu-cuda:18.04
+ARG DOCKER_IMAGE_PREFIX
+FROM ${DOCKER_IMAGE_PREFIX}ubuntu-cuda:18.04

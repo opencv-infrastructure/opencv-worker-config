@@ -1,4 +1,5 @@
-FROM opencv-ubuntu:18.04
+ARG DOCKER_IMAGE_PREFIX
+FROM ${DOCKER_IMAGE_PREFIX}ubuntu:18.04
 
 # Based on code from https://gitlab.com/nvidia/cuda/blob/ubuntu18.04 distributed under BSD-like license
 #MAINTAINER "NVIDIA CORPORATION <cudatools@nvidia.com>"
