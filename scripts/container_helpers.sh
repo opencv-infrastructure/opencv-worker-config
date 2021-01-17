@@ -65,6 +65,7 @@ opencv_worker_container_create()
   if [[ -z "${BUILD_BIGDATA}" ]]; then
     DOCKER_OPTS="$DOCKER_OPTS --memory 6G"
   fi
+  DOCKER_OPTS="$DOCKER_OPTS --mount type=tmpfs,destination=/tmp,tmpfs-size=${DOCKER_TMPFS_SIZE-1073741824}"  # 1024MB
   . /app/scripts/container_options.sh
   DOCKER_OPTS="$DOCKER_OPTS -v $(host_mountpoint /app/deploy_worker):/app/deploy:ro"
   DOCKER_OPTS="$DOCKER_OPTS -v $(host_mountpoint /app/bin_worker):/app/bin:ro"

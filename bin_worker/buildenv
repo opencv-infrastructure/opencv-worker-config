@@ -18,6 +18,10 @@ if [ -n "${CCACHE_VERSION}" ]; then
     mkdir -p "${CCACHE_DIR}"
     ccache -M 8G
   fi
+  export CCACHE_TEMPDIR=/tmp/ccache  # prefer to use tmpfs storage
+  if [ ! -d "${CCACHE_TEMPDIR}" ]; then
+    mkdir -p "${CCACHE_TEMPDIR}"
+  fi
 fi
 
 get_image_script()
