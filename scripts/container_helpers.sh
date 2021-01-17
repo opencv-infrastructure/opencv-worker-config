@@ -48,6 +48,11 @@ opencv_worker_container_create()
 
   mkdir -p $WORK_DIR/.container
 
+  if [[ -f "/app/images/${BUILD_IMAGE}/.image_disallow" ]]; then
+    echo "FATAL: Build image '${BUILD_IMAGE}' is not allowed on the current build worker" 1>&2
+    return 1
+  fi
+
   # Keep images up-to-date
   if [ ! -n "${DOCKER_SKIP_PULL:-}" ]; then
     # TODO: $DOCKER pull --quiet "${DOCKER_IMAGE}" || true
