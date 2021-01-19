@@ -142,7 +142,9 @@ build_image()
   fi
 
   local deps=$(grep -E '^FROM' $IMAGES_DIR/$image/docker/Dockerfile | head -n1 | sed -E 's/FROM +//g')
-  if [[ "${deps}" == opencv-* ]]; then  # legacy
+  if [ -n "${NODEPS:-}" ]; then
+    echo "WARNING: dependencies are not handled (NODEPS=${NODEPS}): $deps"
+  elif [[ "${deps}" == opencv-* ]]; then  # legacy
     deps=${DOCKER_IMAGE_PREFIX}${deps/#opencv-/}
     echo "Deps: $deps"
     check_dependency $deps ||
@@ -161,6 +163,10 @@ build_image()
   fi
 
   (
+    if [[ -n "${NOBUILD:-}" ]]; then
+      echo "WARNING: no image build performed (NOBUILD=${NOBUILD}): $docker_image ($image)"
+      return 0
+    fi
     echo "Processing image: $docker_image ($image)"
     cd $IMAGES_DIR/$image/docker
     if [ -d ../post-build ]; then
@@ -259,7 +265,9 @@ push_image_to_registry()
   local docker_image=${DOCKER_IMAGE_PREFIX}$(echo $image | sed 's/--/:/g')
   if [ -n "${PUSH_IMAGE:-}" ]; then
     local docker_push_image=${DOCKER_PUSH_IMAGE_PREFIX:-DOCKER_IMAGE_PREFIX}$(echo $image | sed 's/--/:/g')
-    execute docker tag "${docker_image}" "${docker_push_image}"
+    if [[ "${docker_image}" != "${docker_push_image}" ]]; then
+      execute docker tag "${docker_image}" "${docker_push_image}"
+    fi
     execute docker push "${docker_push_image}" ||
     {
       echo "==============================================================================="
@@ -268,7 +276,27 @@ push_image_to_registry()
       echo "==============================================================================="
       exit 1
     }
-    execute docker rmi "${docker_push_image}"
+    if [[ "${docker_image}" != "${docker_push_image}" ]]; then
+      docker rmi "${docker_push_image}"
+    fi
+    if [[ "${PUSH_IMAGE}" != "nobackup" ]]; then
+      if result=$(docker image inspect --format "{{.Created}}" "$docker_image" 2>&1); then
+        createDate=$(date "-d$result" +%Y%m%d-%H%M%S)
+      else
+        echo $ERROR_STYLE"Can't query image creation date: $docker_image"$RESET
+        createDate=$(date +%Y%m%d-%H%M%S)
+      fi
+      # check for ':latest' tag
+      if result=$(docker image inspect --format "{{.Created}}" "$docker_image:latest" 2>&1); then
+        backup_suffix=":latest--$createDate"
+      else
+        backup_suffix="--$createDate"
+      fi
+      local docker_backup_image=${docker_push_image}${backup_suffix}
+      docker tag "${docker_image}" "${docker_backup_image}"
+      execute docker push "${docker_backup_image}" || true
+      docker rmi "${docker_backup_image}"
+    fi
   fi
 }
 
