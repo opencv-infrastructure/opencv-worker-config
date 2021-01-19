@@ -55,8 +55,10 @@ opencv_worker_container_create()
 
   # Keep images up-to-date
   if [ ! -n "${DOCKER_SKIP_PULL:-}" ]; then
-    # TODO: $DOCKER pull --quiet "${DOCKER_IMAGE}" || true
-    $DOCKER pull "${DOCKER_IMAGE}" || true
+    for i in 1 2 3; do
+      $DOCKER pull --quiet "${DOCKER_IMAGE}" && break
+      sleep 5
+    done
   fi
 
   if [[ "$($DOCKER images -q ${DOCKER_IMAGE} 2> /dev/null)" == "" ]]; then
