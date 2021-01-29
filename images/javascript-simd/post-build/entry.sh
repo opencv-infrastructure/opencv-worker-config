@@ -34,6 +34,5 @@ if [ -x ${DIR}/prepare_root.sh ]; then
 fi
 
 su - build -c "${DIR}/prepare.sh \"${DIR}\" ${IMAGE_NAME}" 2>&1 | tee /tmp/container.log
-
-exit 0
+exit $?
 }

@@ -42,6 +42,5 @@ mkdir -p /opt/build-containers-cache/emsdk-${EMSDK_VERSION}/
 chown build:build /opt/build-containers-cache/emsdk-${EMSDK_VERSION}/
 
 su - build -c "${DIR}/prepare.sh \"${DIR}\" ${IMAGE_NAME}" 2>&1 | tee /tmp/container.log
-
-exit 0
+exit $?
 }

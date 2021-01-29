@@ -1,4 +1,5 @@
 #!/bin/bash -e
+{ # force bash to read file completelly
 
 # Container started with these mounted volumes:
 # - /app
@@ -36,5 +37,5 @@ mkdir -p /opt/ffmpeg
 chown build:build /opt/ffmpeg
 
 su - build -c "${DIR}/prepare.sh \"${DIR}\" ${IMAGE_NAME}" 2>&1 | tee /tmp/container.log
-
-exit 0
+exit $?
+}

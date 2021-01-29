@@ -15,7 +15,7 @@ set -x
 git describe || (rm -rf ./.git && git clone --recursive https://github.com/microsoft/onnxruntime.git .)
 git reset --hard || true
 git clean -f -d || true
-git fetch origin
+git fetch origin || true
 git checkout -B test v1.5.1 #origin/master
 git submodule sync --recursive
 git submodule update --init --recursive

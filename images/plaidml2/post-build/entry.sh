@@ -1,4 +1,5 @@
 #!/bin/bash -e
+{ # force bash to read file completelly
 
 # Container started with these mounted volumes:
 # - /app
@@ -34,3 +35,4 @@ chown build:build /home/build
 set -o pipefail
 su - build -c "${DIR}/prepare.sh \"${DIR}\" ${IMAGE_NAME}" 2>&1 | tee /tmp/container.log
 exit $?
+}
