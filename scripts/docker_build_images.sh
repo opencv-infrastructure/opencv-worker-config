@@ -264,6 +264,10 @@ push_image_to_registry()
   local image=$1
   local docker_image=${DOCKER_IMAGE_PREFIX}$(echo $image | sed 's/--/:/g')
   if [ -n "${PUSH_IMAGE:-}" ]; then
+    if [ -f $IMAGES_DIR/$image/.image_local ]; then
+      echo "${docker_image}: SKIP image push to registry (.image_local marker)"
+      return 0
+    fi
     local docker_push_image=${DOCKER_PUSH_IMAGE_PREFIX:-DOCKER_IMAGE_PREFIX}$(echo $image | sed 's/--/:/g')
     if [[ "${docker_image}" != "${docker_push_image}" ]]; then
       execute docker tag "${docker_image}" "${docker_push_image}"
