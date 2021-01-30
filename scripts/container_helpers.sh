@@ -53,8 +53,8 @@ opencv_worker_container_create()
     return 1
   fi
 
-  # Keep images up-to-date
-  if [ ! -n "${DOCKER_SKIP_PULL:-}" ]; then
+  if [[ ! -n "${DOCKER_SKIP_PULL:-}" && ! -f "/app/images/${BUILD_IMAGE}/.image_local" ]]; then
+    # Keep images up-to-date
     for i in 1 2 3; do
       $DOCKER pull --quiet "${DOCKER_IMAGE}" && break
       sleep 5
