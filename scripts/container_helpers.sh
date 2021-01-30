@@ -99,7 +99,10 @@ opencv_worker_container_create()
     x=$((x+1))
     sleep .1
   done
-  [ -e $WORK_DIR/.container/Initialized ]
+  if [ ! -e $WORK_DIR/.container/Initialized ]; then
+    echo "FATAL: Container initialization bootstrap timeout (30 sec)"
+    return 1
+  fi
 }
 
 opencv_worker_container_exec()
