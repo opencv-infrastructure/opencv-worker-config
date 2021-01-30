@@ -18,7 +18,7 @@ rsync -axHAX /opt/build-containers-cache/emsdk-${EMSDK_VERSION}/ ${EMSDK_DIR}/
 pushd ${EMSDK_DIR}
 
 set -x
-git rev-parse HEAD || (rm -rf ./.git && git clone https://github.com/juj/emsdk.git .)
+git rev-parse HEAD || (rm -rf ./.git && git clone https://github.com/emscripten-core/emsdk .)
 git reset --hard || true
 git clean -f -d || true
 git fetch origin

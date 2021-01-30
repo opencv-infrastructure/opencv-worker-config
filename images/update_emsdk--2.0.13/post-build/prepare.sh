@@ -22,7 +22,7 @@ git rev-parse HEAD || (rm -rf ./.git && git clone https://github.com/emscripten-
 git reset --hard || true
 git clean -f -d || true
 git fetch origin
-git checkout -B master origin/master
+git checkout -B deploy ${EMSDK_GIT_TAG:-${EMSDK_VERSION}}
 git rev-parse HEAD
 
 # update git source cache back
