@@ -24,6 +24,19 @@ if [ -n "${CCACHE_VERSION}" ]; then
   fi
 fi
 
+if [[ -n "${BUILD_INITIALIZE}" ]]; then
+  echo "==================== OS/System information ===================="
+  (
+  echo "uname: $(uname -smpio 2>/dev/null || uname -smo 2>/dev/null || uname 2>/dev/null || echo 'N/A')"
+  echo "getconf[LONG_BIT]: $(getconf LONG_BIT 2>/dev/null || echo 'N/A')"
+  [ -f /etc/os-release ] && grep -E '(VERSION|NAME|ID)' /etc/os-release  # Debian
+  [ -f /etc/lsb-release ] && cat /etc/lsb-release  # Ubuntu
+  [ -f /etc/redhat-release ] && cat /etc/redhat-release  # Fedora, CentOS
+  [ -f /etc/alpine-release ] && cat /etc/alpine-release  # Alpine
+  ) || true
+  echo "==============================================================="
+fi
+
 get_image_script()
 {
   local image=$1
