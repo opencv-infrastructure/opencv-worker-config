@@ -4,8 +4,13 @@ if [ -f /app/deploy/env.sh ]; then
   . /app/deploy/env.sh
 fi
 
-virtualenv --system-site-packages /env
-. /env/bin/activate
+if [ ! -f /env/bin/activate ]; then
+  virtualenv --system-site-packages /env
+  . /env/bin/activate
+  pip install -U 'pip<21' wheel 'setuptools<45' six
+else
+  . /env/bin/activate
+fi
 
 set -x
 
