@@ -7,10 +7,11 @@ fi
 
 export
 
-virtualenv /opt/pythonenv
+python2 -m virtualenv /opt/pythonenv
 . /opt/pythonenv/bin/activate
 
-pip install --upgrade pip wheel 'setuptools<45' six
+python -m pip install --upgrade pip wheel 'setuptools<45' six
+# doesn't work (OpenCV doesn't use virtualenv): python -m pip install numpy
 
 cd /opt/build
 (
