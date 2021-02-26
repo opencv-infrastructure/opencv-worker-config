@@ -4,7 +4,7 @@ fi
 
 ARGS_ORIG=("$@")
 
-if [[ "${BUILD_BRANCH}" == "master" ]]; then
+if [[ "${BUILD_BRANCH}" != "3.4" ]]; then
   ARGS=("$@")
   if [[ "${ARGS[0]}" == "cmake" ]]; then
     ARGS[0]="cmake3"
