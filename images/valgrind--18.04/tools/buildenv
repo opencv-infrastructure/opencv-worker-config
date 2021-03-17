@@ -1,0 +1,6 @@
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  gst-inspect-1.0  # create GStreamer registry cache
+  exit 0
+fi
+
+exec "$@"
