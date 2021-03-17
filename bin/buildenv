@@ -48,11 +48,10 @@ if [[ -n "${BUILD_IMAGE}" && -z "${BUILD_IMAGE_}" ]]; then
   while [ "${BUILD_IMAGE_}" != "${BUILD_IMAGE_ORIGIN0}" ]; do
     BUILD_IMAGE_ORIGIN0="${BUILD_IMAGE_}"
     if [ -f "${BASE_DIR}/images/${BUILD_IMAGE_}/alias" ]; then
-      while read LINE; do
-        if [ -n "${LINE}" ]; then
-          BUILD_IMAGE_="$LINE"
-        fi
-      done <"${BASE_DIR}/images/${BUILD_IMAGE_}/alias"
+      aliased_image=$(head -n1 "${BASE_DIR}/images/${BUILD_IMAGE_}/alias")
+      if [ -n "${aliased_image}" ]; then
+        BUILD_IMAGE_="${aliased_image}"
+      fi
     fi
   done
   if [ -n "${BUILD_INITIALIZE}" ]; then
