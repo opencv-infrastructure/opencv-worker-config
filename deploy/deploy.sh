@@ -7,11 +7,12 @@ fi
 
 export
 
+#virtualenv /opt/pythonenv
 python2 -m virtualenv /opt/pythonenv
 . /opt/pythonenv/bin/activate
 
 python -m pip install --upgrade pip wheel 'setuptools<45' six
-# doesn't work (OpenCV doesn't use virtualenv): python -m pip install numpy
+python -m pip install numpy
 
 cd /opt/build
 (
@@ -37,6 +38,7 @@ mkdir -p /build/_repos
 [ -d ${HOME}/Library/Frameworks/Python.framework ] ||
 {
   mkdir -p ${HOME}/Library/Frameworks/
+  set -x
   list=( /usr/local/Cellar/python@2/2.7* )
   python_framework="${list[${#list[@]}-1]}"
   ln -s ${python_framework}/Frameworks/Python.framework ${HOME}/Library/Frameworks/
