@@ -31,6 +31,13 @@ RUN \
   rm -rf /var/lib/apt/lists/*
 
 RUN \
+  apt-get update && \
+  apt-get install -y --no-install-recommends \
+    libva-dev \
+    && \
+  rm -rf /var/lib/apt/lists/*
+
+RUN \
   wget -O /tmp/abi-compliance-checker-2.2.tar.gz https://github.com/lvc/abi-compliance-checker/archive/2.2.tar.gz && \
   echo "9fb7b17e33d49e301d02a6374fbd2596feb53ecc77194879a4e1c2d1e24b4ddb /tmp/abi-compliance-checker-2.2.tar.gz" | sha256sum -c && \
   mkdir -p /opt/ && cd /opt/ && \

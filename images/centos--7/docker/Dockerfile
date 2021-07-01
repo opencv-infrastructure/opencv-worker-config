@@ -22,6 +22,12 @@ RUN \
     && \
   yum clean all
 
+RUN \
+  yum install -y --setopt=skip_missing_names_on_install=False \
+    libva-devel \
+    && \
+  yum clean all
+
 # No replacements:
 #    libavformat-dev libavformat-extra-54 libswscale-dev \
 #    libgdcm2-dev \
