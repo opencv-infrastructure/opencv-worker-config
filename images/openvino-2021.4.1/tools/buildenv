@@ -1,0 +1,17 @@
+ARGS=("$@")  # save original script arguments
+set --  # no args for OpenVINO script
+# save and restore PYTHONPATH (we don't want to test OpenVINO OpenCV bindings here)
+PYTHONPATH_SAVED=${PYTHONPATH}
+. /opt/intel/openvino_2021.4.689/bin/setupvars.sh
+export PYTHONPATH=${PYTHONPATH_SAVED}
+
+set -- "${ARGS[@]}"  # restore original script arguments
+
+if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
+  ARGS+=("-DENABLE_CXX11=ON")
+  ARGS+=("-DWITH_INF_ENGINE=ON")
+  ARGS+=("-DINF_ENGINE_RELEASE=2021040100")
+  set -- "${ARGS[@]}"
+fi
+
+exec "$@"
