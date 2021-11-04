@@ -1,0 +1,71 @@
+ARGS=("$@")  # save original script arguments
+set --  # no args for env script
+. /opt/intel/oneapi/vpl/2021.6.0/env/vars.sh
+
+set -- "${ARGS[@]}"  # restore original script arguments
+
+export LIBVA_DRIVERS_PATH=/usr/lib/x86_64-linux-gnu/dri
+export LIBVA_DRIVER_NAME=iHD
+
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo "BUILD-PROP run_abi_check=0" >&2
+  echo "======== uname"
+  uname -a || true
+  echo "======== vpl-inspect"
+  vpl-inspect || true
+  echo "======== vainfo"
+  vainfo -a || true
+  exit 0
+fi
+
+if [[ "$1" != *cmake* ]]; then
+  ARGS=()
+  for arg in "$@"; do
+    if [[ "$arg" == "python" ]]; then
+      ARGS+=("python3")
+    else
+      ARGS+=("$arg")
+    fi
+  done
+  set -- "${ARGS[@]}"
+fi
+
+# CMake OpenCV
+if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
+  ARGS=()
+  USING_NINJA=0
+  for arg in "$@"; do
+    if [[ "$arg" =~ "-G*" ]]; then
+      ARGS+=("-GNinja")
+      USING_NINJA=1
+    else
+      ARGS+=("$arg")
+    fi
+  done
+  if [[ "${USING_NINJA}" == "0" ]]; then
+    ARGS+=("-GNinja")
+  fi
+  ARGS+=("-DWITH_MFX=ON")  # enable oneVPL
+  set -- "${ARGS[@]}"
+fi
+
+# CMake samples
+if [[ "$1" == *cmake* && "$2" == *opencv/samples ]]; then
+  ARGS=()
+  USING_NINJA=0
+  for arg in "$@"; do
+    if [[ "$arg" =~ "-G*" ]]; then
+      ARGS+=("-GNinja")
+      USING_NINJA=1
+    else
+      ARGS+=("$arg")
+    fi
+  done
+  if [[ "${USING_NINJA}" == "0" ]]; then
+    ARGS+=("-GNinja")
+  fi
+  set -- "${ARGS[@]}"
+fi
+
+echo "$@"
+exec "$@"

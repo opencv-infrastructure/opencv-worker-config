@@ -34,7 +34,10 @@ if [[ -n "${BUILD_INITIALIZE}" ]]; then
   [ -f /etc/redhat-release ] && cat /etc/redhat-release  # Fedora, CentOS
   [ -f /etc/alpine-release ] && cat /etc/alpine-release  # Alpine
   ) || true
-  echo "==============================================================="
+  if command -v clinfo >/dev/null 2>/dev/null ; then
+    echo "================== clinfo ==================================="
+    clinfo || true
+  fi
 fi
 
 get_image_script()

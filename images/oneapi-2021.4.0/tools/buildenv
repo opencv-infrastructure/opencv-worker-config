@@ -1,0 +1,72 @@
+ARGS=("$@")  # save original script arguments
+set --  # no args for env script
+. /opt/intel/oneapi/setvars.sh
+
+set -- "${ARGS[@]}"  # restore original script arguments
+
+export TBB_DIR=/opt/intel/oneapi/tbb/latest/lib/cmake/tbb
+
+if [ -n "${BUILD_INITIALIZE}" ]; then
+  echo "BUILD-PROP run_abi_check=0" >&2
+  export  # dump env
+  uname -a
+  exit 0
+fi
+
+if [[ "$1" != *cmake* ]]; then
+  ARGS=()
+  for arg in "$@"; do
+    if [[ "$arg" == "python" ]]; then
+      ARGS+=("python3")
+    else
+      ARGS+=("$arg")
+    fi
+  done
+  set -- "${ARGS[@]}"
+fi
+
+# Force DPC++ compiler
+export CC=clang
+export CXX=dpcpp
+
+# CMake OpenCV
+if [[ "$1" == *cmake* && "$2" != "--build" && "$2" != *opencv/samples ]]; then
+  ARGS=()
+  USING_NINJA=0
+  for arg in "$@"; do
+    if [[ "$arg" =~ "-G*" ]]; then
+      ARGS+=("-GNinja")
+      USING_NINJA=1
+    else
+      ARGS+=("$arg")
+    fi
+  done
+  if [[ "${USING_NINJA}" == "0" ]]; then
+    ARGS+=("-GNinja")
+  fi
+  ARGS+=("-DENABLE_CXX11=ON")
+  #ARGS+=("-DWITH_MFX=ON")
+  set -- "${ARGS[@]}"
+fi
+
+# CMake samples
+if [[ "$1" == *cmake* && "$2" == *opencv/samples ]]; then
+  ARGS=()
+  USING_NINJA=0
+  for arg in "$@"; do
+    if [[ "$arg" =~ "-G*" ]]; then
+      ARGS+=("-GNinja")
+      USING_NINJA=1
+    else
+      ARGS+=("$arg")
+    fi
+  done
+  if [[ "${USING_NINJA}" == "0" ]]; then
+    ARGS+=("-GNinja")
+  fi
+  #ARGS+=("-DOPENCV_EXAMPLES_DISABLE_THREADS=ON")  # 4.5.4: TBB search bug (resolved)
+  set -- "${ARGS[@]}"
+fi
+
+echo "$@"
+exec "$@"

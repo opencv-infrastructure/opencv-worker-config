@@ -3,6 +3,14 @@ host_mountpoint()
   echo "$*"
 }
 
-# attach Intel iGPU
-# DOCKER_OPTS="--device=/dev/dri:/dev/dri"
+if [[ "${CONTAINER_SKIP_ADDING_OPENCL}" == "1" ]]; then
+  # nothing
+  echo "SKIP: adding default OpenCL runtime"
+elif [[ "${CONTAINER_OPENCL_ADD_DEV_ONLY}" == "1" ]]; then
+  DOCKER_OPTS="$DOCKER_OPTS --device=/dev/dri:/dev/dri"
+  echo "Container/OpenCL: adding /dev/dri only"
+elif [[ -n "${OPENCL_BASE_DIR}" && -f "${OPENCL_BASE_DIR}/docker_configure.sh" ]]; then
+  . ${OPENCL_BASE_DIR}/docker_configure.sh
+fi
+
 DOCKER_OPTS="$DOCKER_OPTS -v /opt/build-worker:/opt/build-worker:ro"
