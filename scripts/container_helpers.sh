@@ -32,6 +32,12 @@ opencv_worker_container_cleanup()
   rm -rf $WORK_DIR/.container || true
 }
 
+opencv_worker_container_fetch_image_file()
+{
+  local FILE=$1
+  docker run --rm --entrypoint cat ${DOCKER_IMAGE} "$FILE"
+}
+
 opencv_worker_container_create()
 {
   local BUILD_IMAGE=$1
