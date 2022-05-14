@@ -1,11 +1,11 @@
 FROM ubuntu:20.04
 
- RUN \
+RUN \
    apt-get update && \
    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-     cmake build-essential ccache ninja-build git wget \
+     cmake build-essential ccache ninja-build git wget curl zip unzip mc nano time file\
      python2-dev python-numpy \
-     python3-dev python3-numpy \
+     python3-dev python3-numpy python3-setuptools python3-pip\
      zlib1g-dev libjpeg-dev libpng-dev libtiff5-dev libopenjp2-7-dev \
      libgtk-3-dev \
      libavcodec-dev libavformat-dev libswscale-dev \
@@ -19,10 +19,10 @@ FROM ubuntu:20.04
      libgoogle-glog-dev \
      libatlas-base-dev libeigen3-dev libsuitesparse-dev liblapacke-dev \
      xvfb \
-     && \
-   rm -rf /var/lib/apt/lists/*
+     pkg-config && \
+   apt-get clean && python3 -m pip install --upgrade pip && pip install requests pylint==2.4.4 && pip cache purge
 
- RUN \
+RUN \
    apt-get update && \
    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
      libva-dev \
@@ -32,4 +32,7 @@ FROM ubuntu:20.04
      libdc1394-22-dev \
      libgphoto2-dev \
      && \
+   mkdir /opencv /opencv-build /opencv-contrib-build && \
    rm -rf /var/lib/apt/lists/*
+
+CMD bash
