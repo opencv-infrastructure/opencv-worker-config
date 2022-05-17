@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 RUN \
    apt-get update && \
    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-     cmake build-essential ccache ninja-build git wget curl zip unzip mc nano time file\
+     cmake build-essential ccache ninja-build git wget curl rsync zip unzip mc nano time file\
      python2-dev python-numpy \
      python3-dev python3-numpy python3-setuptools python3-pip\
      zlib1g-dev libjpeg-dev libpng-dev libtiff5-dev libopenjp2-7-dev \
